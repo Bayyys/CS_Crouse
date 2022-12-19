@@ -8,6 +8,8 @@
 
 [Introductory C Programming Specialization](#Introductory C Programming Specialization)
 
+[Stanford CS106B/X: Programming Abstractions in C++](#Stanford CS106B/X: Programming Abstractions in C++)
+
 # MIT-Missing-Semester
 
 ## [课程简介](Notes/MIT-Missing-Semester.md)
@@ -79,3 +81,21 @@
 ## 资源汇总
 
 @haidongji 在学习这门课中的作业实现都汇总在 [Duke Coursera Intro C](https://code.haidongji.com/Duke_Coursera_Intro_C/) 中。因为时间关系，我最后一课最后一周的几个作业到目前还没有完成。
+
+# Stanford CS106B/X: Programming Abstractions in C++
+
+## 课程简介
+
+- 所属大学：Stanford
+- 先修要求：计算机基础 (CS50/CS106A/CS61A or equivalent)
+- 编程语言：C++
+- 课程难度：🌟🌟
+- 预计学时：50-70 小时
+
+Stanford 的进阶编程课，CS106X 在难度和深度上会比 CS106B 有所提高，但主体内容类似。主要通过 C++ 语言让学生在实际的编程作业里培养通过编程抽象解决实际问题的能力，同时也会涉及一些简单的数据结构和算法的知识，但总体来说没有一门专门的数据结构课那么系统。
+
+## 课程资源
+
+- 课程网站：[CS106B](https://web.stanford.edu/class/cs106b/schedule.html), [CS106X](https://web.stanford.edu/class/cs106x/)
+- 课程教材：https://web.stanford.edu/class/cs106x/res/reader/CS106BX-Reader.pdf
+- 课程视频：https://www.bilibili.com/video/BV1Hr4y137Do/?spm_id_from=333.337.search-card.all.click&vd_source=2228fbb3090a9774de8d595d37290e9e
