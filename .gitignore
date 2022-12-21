@@ -1,4 +1,5 @@
-CS106B_Stanford_C++/code/*/*.exe
-CS106B_Stanford_C++/code/*/*.pro.user*
+CS106B_Stanford_C++/code/*/*/*.exe
+CS106B_Stanford_C++/code/*/*/*.pro.user*
 
+CS106B_Stanford_C++/code/*/build-*/
 CS106B_Stanford_C++/code/build-*/
