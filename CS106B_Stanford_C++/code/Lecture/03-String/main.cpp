@@ -111,14 +111,14 @@ int main() {
 //    pollFive();
 //    pollSix();
 
-    loopingOverStrFor("Bayyy");
-    cout << endl;
-    loopingOverStrForEach("Bay");
-    cout << endl;
+//    loopingOverStrFor("Bayyy");
+//    cout << endl;
+//    loopingOverStrForEach("Bay");
+//    cout << endl;
 
 //    alphabetLoop();
 //    cout << endl;
 
-//    weirdCstringExamples();
+    weirdCstringExamples();
     return 0;
 }
