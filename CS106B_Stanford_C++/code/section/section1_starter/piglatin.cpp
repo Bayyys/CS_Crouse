@@ -35,13 +35,32 @@ using namespace std;
  * pigLatinReference() expects the parameter INPUT to be modified by the function call.
  */
 
+const string VOWELS = "aeiouy";
+
+bool isVowel(char ch){
+    return VOWELS.find(ch) != string::npos;
+}
+
 string pigLatinReturn(string input) {
-    (void) input;
-    return "";
+    int index = 0;
+    for(int i = 0; i < input.length(); i++){
+        if(isVowel(input[i])){
+            index = i;
+            break;
+        }
+    }
+    return input.substr(index) + input.substr(0, index) + "ay";
 }
 
 void pigLatinReference(string &input) {
-    (void) input;
+    int index = 0;
+    for(int i = 0; i < input.length(); i++){
+        if(isVowel(input[i])){
+            index = i;
+            break;
+        }
+    }
+    input =  input.substr(index) + input.substr(0, index) + "ay";
 }
 
 

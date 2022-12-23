@@ -23,10 +23,10 @@ using namespace std;
  * them and fix the code so that it passes all of the tests?
  */
 
-void deduplicate(Vector<string> vec) {
-    for (int i = 0; i < vec.size(); i++) {
-        if (vec[i] == vec[i + 1]) {
-            vec.remove(i + 1);
+void deduplicate(Vector<string>& vec) {
+    for (int i = vec.size() - 1; i > 0; i--){
+        if (vec[i] == vec[i - 1]) {
+            vec.remove(i);
         }
     }
 }

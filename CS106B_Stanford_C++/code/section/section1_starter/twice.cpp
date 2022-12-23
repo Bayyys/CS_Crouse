@@ -24,8 +24,18 @@ using namespace std;
  * that appear exactly twice.
  */
 
-Set<int> twice(Vector<int> nums) {
-    return {};
+Set<int> twice(Vector<int>& v) {
+    Map<int, int> counts;
+    for (int i : v) {
+        counts[i]++;
+    }
+    Set<int> twice;
+    for (int i : counts) {
+        if (counts[i] == 2) {
+            twice += i;
+        }
+    }
+    return twice;
 }
 
 

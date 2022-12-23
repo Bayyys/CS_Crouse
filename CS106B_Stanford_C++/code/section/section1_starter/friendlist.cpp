@@ -28,8 +28,23 @@ using namespace std;
  * by a single space. You do not have to worry about malformed entries.
  */
 
-Map<string, Vector<string>> friendList(string filename) {
-    return {};
+Map<string, Vector<string> > friendList(string filename) {
+    ifstream in;
+    Vector<string> lines;
+
+    if (openFile(in, filename)) {
+        readEntireFile(in, lines);
+    }
+
+    Map<string, Vector<string> > friends;
+    for (string line: lines) {
+        Vector<string> people = stringSplit(line, " ");
+        string s1 = people[0];
+        string s2 = people[1];
+        friends[s1] += s2;
+        friends[s2] += s1;
+    }
+    return friends;
 }
 
 

@@ -1,6 +1,8 @@
 #include <iostream>
 #include "console.h"
 #include "SimpleTest.h"
+#include <fstream>
+#include <cstring>
 
 using namespace std;
 

@@ -25,6 +25,27 @@ using namespace std;
  */
 
 int checkBalance(string code) {
+    Stack<char> s;
+    for(int i = 0; i < code.length(); i++){
+        char c = code[i];
+        if(c == '(' || c == '{'){
+            s.push(c);
+        } else if(c == ')' || c == '}'){
+            if(s.isEmpty()){
+                return i;
+            }
+            char top = s.pop();
+            if((top == '(' && c != ')') || (top == '{' && c != '}')){
+                return i;
+            }
+        }
+
+    }
+    if(s.isEmpty()){
+        return -1;
+    } else {
+        return code.length();
+    }
     return 0;
 }
 
