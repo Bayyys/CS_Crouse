@@ -6,11 +6,18 @@
 #include "string.h"
 #include "strlib.h"
 #include "simpio.h"
+
 using namespace std;
 
 void runInsert(int size);
 void runAdd(int size);
-
+void personalMessage();
+void printSquare();
+void vectorTest();
+void loopPrintVec(Vector<int> vec);
+void forEachLoopPrintVec(Vector<int> vec);
+void testEliminateNegativity();
+void eliminateNegativity(Vector<int> &vec);
 
 int main()
 {
@@ -18,12 +25,62 @@ int main()
 //        return 0;
 //    }
 
-//    cout << "This progrom greets with a personalized message" << endl;
-//    string name = getLine("please enter your name: ");
-//    string food = getLine("Please enter your favorite food: ");
-//    cout << "Hello" << name << ", it's so nice to meet you!" << endl;
-//    cout << "Would you like some " << food << " to eat?" << endl;
+//    personalMessage();
+//    printSquare();
+//    vectorTest();
+    testEliminateNegativity();
 
+
+    cout << "All done, exiting" << endl;
+    return 0;
+}
+
+void eliminateNegativity(Vector<int> &vec){
+    for(int i = 0; i < vec.size(); i++){
+        if(vec[i] < 0){
+            vec[i] = vec[i] * (-1);
+        }
+    }
+}
+
+void testEliminateNegativity(){
+    Vector<int> vec = {1, -4, 18, -11};
+    eliminateNegativity(vec);
+    cout << vec << endl;
+}
+
+void vectorTest(){
+    Vector<int> vec = {2, 4, 6};
+//    cout << vec[3] << endl;   // Vector::operator []: index of 3 is outside of valid range [0..2]
+    cout << "The original vector is " << vec << endl;
+    vec.remove(1);
+    cout << "After remove the index 1 element, the vector is " << vec << endl;
+    cout << "The size of vector is " << vec.size() << endl;
+    loopPrintVec(vec);
+    forEachLoopPrintVec(vec);
+}
+
+void forEachLoopPrintVec(Vector<int> vec){
+       for(int num: vec){
+           cout << num << endl;
+       }
+}
+
+void loopPrintVec(Vector<int> vec){
+       for(int i = 0; i < vec.size(); i++) {
+           cout << "Vector[" << i << "] is " << vec[i] << endl;
+       }
+}
+
+void  personalMessage(){
+        cout << "This progrom greets with a personalized message" << endl;
+        string name = getLine("please enter your name: ");
+        string food = getLine("Please enter your favorite food: ");
+        cout << "Hello" << name << ", it's so nice to meet you!" << endl;
+        cout << "Would you like some " << food << " to eat?" << endl;
+}
+
+void printSquare(){
     cout << "It's a program of Compute the Number Square" << endl;
     cout << "You can enter one int_num! And I will tell the square of it!" << endl;
     cout << " " << endl;
@@ -41,11 +98,7 @@ int main()
             cout << "The square of " << number << " is " << num * num << "." << endl;
         }
     }
-
-    cout << "All done, exiting" << endl;
-    return 0;
 }
-
 
 void runInsert(int size)
 {
