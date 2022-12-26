@@ -11,6 +11,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include "map.h"
 #include "vector.h"
 #include "filelib.h"
@@ -29,7 +30,17 @@ using namespace std;
  */
 
 Map<string, Vector<string>> friendList(string filename) {
-    return {};
+    ifstream in;
+    in.open(filename);
+    Vector<string> lines;
+    Map<string, Vector<string>> friends;
+    readEntireFile(in, lines);
+    for(string line: lines){
+        Vector<string> people = stringSplit(line, " ");
+        friends[people[0]] += people[1];
+        friends[people[1]] += people[0];
+    }
+    return friends;
 }
 
 

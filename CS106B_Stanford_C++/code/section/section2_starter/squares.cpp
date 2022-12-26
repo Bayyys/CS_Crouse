@@ -23,8 +23,13 @@ using namespace std;
  */
 
 int sumOfSquares(int n) {
-    // TODO: Your code here
-    return 0;
+    if(n < 0){
+        error("Value of provided n was negative");
+    } else if(n == 0){
+        return 0;
+    } else {
+        return sumOfSquares(n - 1) + n * n;
+    }
 }
 
 

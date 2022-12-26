@@ -25,7 +25,21 @@ using namespace std;
  */
 
 Set<int> twice(Vector<int> nums) {
-    return {};
+    Map<int, int> map;
+    for(int num: nums){
+        if(map.containsKey(num)){
+            map[num] += 1;
+        } else {
+            map[num] = 1;
+        }
+    }
+    Set<int> twice;
+    for(int key: map){
+        if(map[key] == 2){
+            twice.add(key);
+        }
+    }
+    return twice;
 }
 
 
