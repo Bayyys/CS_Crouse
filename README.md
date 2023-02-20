@@ -99,3 +99,9 @@ Stanford 的进阶编程课，CS106X 在难度和深度上会比 CS106B 有所�
 - 课程网站：[CS106B-2022-Fall](https://web.stanford.edu/class/cs106b/schedule.html), [CS106B-2020-Summer](https://web.stanford.edu/class/archive/cs/cs106b/cs106b.1208/schedule), [CS106X](https://web.stanford.edu/class/cs106x/)
 - 课程教材：https://web.stanford.edu/class/cs106x/res/reader/CS106BX-Reader.pdf
 - 课程视频：https://www.bilibili.com/video/BV1Hr4y137Do/?spm_id_from=333.337.search-card.all.click&vd_source=2228fbb3090a9774de8d595d37290e9e
+
+# Android
+
+## 课程资源
+
+- 课程网站：[Android基础教程](https://www.bilibili.com/video/BV19U4y1R7zV?p=1&vd_source=2228fbb3090a9774de8d595d37290e9e)
