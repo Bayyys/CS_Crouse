@@ -1036,5 +1036,9 @@ android.intent.action.MAIN的activity说明它是入口页面 -->
 > android:text="图标在左"
 > android:textSize="17sp" /
 > ```
->
-> 
+
+# 4. 活动Activity
+
+## 4.1 启停活动页面
+
+### 4.1.1 Activity的启动和结束
