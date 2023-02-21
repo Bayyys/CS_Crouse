@@ -4,6 +4,16 @@
 
 - 课程网站：[Android基础教程](https://www.bilibili.com/video/BV19U4y1R7zV?p=1&vd_source=2228fbb3090a9774de8d595d37290e9e)
 
+## Skills
+
+`Alt+Enter`: 代码提示修正方案
+
+`Ctrl+Alt+L`: 代码格式化
+
+`Ctrl+Alt+F`: 自动生成static
+
+`Ctrl+Alt+O`: 自动导入相关包
+
 # 1. 开发环境搭建
 
 ### 1.1 简介
