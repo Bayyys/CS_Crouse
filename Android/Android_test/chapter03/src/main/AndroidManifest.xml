@@ -8,10 +8,25 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Test">
         <activity
-            android:name=".TextSizeActivity"
+            android:name=".ScrollViewActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".GridLayoutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RelativeLayoutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LinearLayoutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ViewGravityActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ViewMarginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CalculatorActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
