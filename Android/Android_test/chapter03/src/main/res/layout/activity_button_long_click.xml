@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="5dp">
+
+    <Button
+        android:id="@+id/btn_long_click"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="指定长按监听器, 原方法"
+        android:textColor="@color/black"
+        android:textSize="17sp" />
+
+    <TextView
+        android:id="@+id/btn_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="查看按钮点击的结果"
+        android:textColor="@color/red"
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/btn_long_click_lambda"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="指定长按监听器, lambda方法"
+        android:textColor="@color/black"
+        android:textSize="17sp" />
+
+</LinearLayout>
