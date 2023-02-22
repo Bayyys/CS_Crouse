@@ -14,6 +14,8 @@
 
 `Ctrl+Alt+O`: 自动导入相关包
 
+`Ctrl+Alt+ButtonLeft`: 查看类的实现方法
+
 # 1. 开发环境搭建
 
 ### 1.1 简介
@@ -273,6 +275,46 @@ android.intent.action.MAIN的activity说明它是入口页面 -->
 - 一个界面布局可以被多处代码复用，比如看图界面，既能通过商城购物代码浏览商品图片，也能通过商品评价代码浏览买家晒单。
 
 - 反过来，一段Java代码也可能适配多个界面布局，比如手机有竖屏与横屏两种模式，默认情况App采用同一套布局，然而在竖屏时很紧凑的界面布局，切换到横屏往往变得松垮乃至变形
+
+## 2.3 App活动页面
+
+### 2.3.1 创建新的app页面
+
+1. 创建XML文件 —> res/layout: New->XML->layout XML File(activity_main2)
+
+2. 创建Java代码 —> java: New->Java Class(Main2Activity.java)
+
+   > ```java
+   > public class Main2Activity extends AppCompatActivity {
+   > 	@Override
+   > 	protected void onCreate(Bundle savedInstanceState) {
+   > 		super.onCreate(savedInstanceState);
+   > 		setContentView(R.layout.activity_main2);
+   > 	}
+   > }
+   > ```
+
+3. 注册页面配置 —> AndroidManifest.xml
+
+   > ```xml
+   > <activity android:name=".Main2Activity"></activity>
+   > // 或
+   > <activity android:name=".Main2Activity /">
+   > ```
+
+### 2.3.2 快速生成页面源码
+
+- /Java:	New->Activity->Empty Activity
+
+### 2.3.3 跳转到另一个页面
+
+> ```java
+> // 活动页面跳转，从MainActivity跳到Main2Activity
+> startActivity(new Intent(MainActivity.this, Main2Activity.class));
+> 
+> // 活动页面跳转，从当前页面跳转到其他页面
+> startActivity(new Intent(this, MainNActivity.class));
+> ```
 
 # 3. 简单控件
 
@@ -611,10 +653,10 @@ android.intent.action.MAIN的activity说明它是入口页面 -->
 | layout_centerInParent    | 当前视图在上级视图的中间         |
 | layout_centerHorizontal  | 当前视图在上级视图的水平方向居中 |
 | layout_centerVertical    | 当前视图在上级视图的垂直方向居中 |
-| layout_alignParentLeft   | 当前视图在上级视图的左侧对齐     |
-| layout_alignParentRight  | 当前视图在上级视图的右侧对齐     |
-| layout_alignParentTop    | 当前视图在上级视图的顶部对齐     |
-| layout_alignParentBottom | 当前视图在上级视图的底部对齐     |
+| layout_alignParentLeft   | 当前视图与上级视图的左侧对齐     |
+| layout_alignParentRight  | 当前视图与上级视图的右侧对齐     |
+| layout_alignParentTop    | 当前视图与上级视图的顶部对齐     |
+| layout_alignParentBottom | 当前视图与上级视图的底部对齐     |
 
 ![image-20230221132335529](https://s2.loli.net/2023/02/21/Bwr4nZXdlIFKGav.png)
 
@@ -1052,3 +1094,988 @@ android.intent.action.MAIN的activity说明它是入口页面 -->
 ## 4.1 启停活动页面
 
 ### 4.1.1 Activity的启动和结束
+
+> ```java
+> // 活动页面跳转，从MainActivity跳到Main2Activity
+> startActivity(new Intent(MainActivity.this, Main2Activity.class));
+> 
+> // 活动页面跳转，从当前页面跳转到其他页面
+> startActivity(new Intent(this, MainNActivity.class));
+> ```
+
+- e.g.
+
+  > ```java
+  > // Act_Start
+  > public class ActStartActivity extends AppCompatActivity implements View.OnClickListener {
+  > 
+  >     @Override
+  >     protected void onCreate(Bundle savedInstanceState) {
+  >         super.onCreate(savedInstanceState);
+  >         setContentView(R.layout.activity_act_start);
+  >         Button btn_act_next = findViewById(R.id.btn_act_next);
+  >         btn_act_next.setOnClickListener(this);
+  >     }
+  > 
+  >     @Override
+  >     public void onClick(View v) {
+  >         startActivity(new Intent(this, ActFinishActivity.class));
+  >     }
+  > }
+  > 
+  > // Act_Finish
+  > public class ActFinishActivity extends AppCompatActivity implements View.OnClickListener {
+  > 
+  >     @Override
+  >     protected void onCreate(Bundle savedInstanceState) {
+  >         super.onCreate(savedInstanceState);
+  >         setContentView(R.layout.activity_act_finish);
+  >         findViewById(R.id.iv_back).setOnClickListener(this);
+  >         findViewById(R.id.btn_back).setOnClickListener(this);
+  >     }
+  > 
+  >     @Override
+  >     public void onClick(View v) {
+  >         if (v.getId() == R.id.iv_back || v.getId() == R.id.btn_back) {
+  >             finish();
+  >         }
+  > 
+  >     }
+  > }
+  > ```
+  >
+  > 
+
+### 4.1.2 Actitity的生命周期
+
+![image-20230222100601404](https://s2.loli.net/2023/02/22/KF4E9U6Vt8svrGb.png)
+
+
+
+- 生命周期：
+
+  1. onCreate：创建活动。此时会把页面布局加载进内存，进入了初始状态。
+
+  2. onStart：开启活动。此时会把活动页面显示在屏幕上，进入了就绪状态。
+
+  3. onResume：恢复活动。此时活动页面进入活跃状态，能够与用户正常交互，例如允许响应用户的点击动作、允许用户输入文字等。
+
+  4. onPause：暂停活动。此时活动页面进入暂停状态（也就是退回就绪状态），无法与用户正常交互。
+
+  5. onStop：停止活动。此时活动页面将不在屏幕上显示。
+
+  6. onDestroy：销毁活动。此时回收活动占用的系统资源，把页面从内存中清除掉。
+
+  7. onRestart：重启活动。处于停止状态的活动，若想重新开启的话，无须经历onCreate的重复创建过程，而是走onRestart的重启过程。
+
+  8. onNewIntent：重用已有的活动实例。
+
+     ![image-20230222101224963](https://s2.loli.net/2023/02/22/5ZdochvaJ7ezuPy.png)
+
+- 基于活动栈的生命周期
+
+![image-20230222101007283](https://s2.loli.net/2023/02/22/4SepuAt1dnHzQws.png)
+
+![image-20230222101013817](https://s2.loli.net/2023/02/22/jsvxbVGpMP8NuXm.png)
+
+### 4.1.3 Activity的启动模式
+
+#### 1. 启动模式
+
+##### 1) 默认启动模式standard
+
+<img src="https://s2.loli.net/2023/02/22/2Ys54tSdM19BZPl.png" alt="image-20230222103348918" style="zoom:50%;" />
+
+##### 2) 栈顶复用模式singleTop
+
+<img src="https://s2.loli.net/2023/02/22/CMHat2JOm8bdefh.png" alt="image-20230222103344906" style="zoom:50%;" />
+
+- 应用场景：适合开启渠道多、多应用开启调用的 Activity，通过这种设置可以避免已经创建过的 Activity 被重复创建，多数通过动态设置使用。
+
+##### 3) 栈内复用模式singleTask
+
+<img src="C:/Users/bayyy/AppData/Roaming/Typora/typora-user-images/image-20230222103608875.png" alt="image-20230222103608875" style="zoom:50%;" />
+
+- 应用场景：
+  - **程序主界面**：我们肯定不希望主界面被创建多次，而且在主界面退出的时候退出整个 App 是最好的效果。
+  - **耗费系统资源的****Activity**：对于那些及其耗费系统资源的 Activity，我们可以考虑将其设为 singleTask模式，减少资源耗费。
+
+##### 4) 全局位移模式singleInstance
+
+<img src="C:/Users/bayyy/AppData/Roaming/Typora/typora-user-images/image-20230222103615106.png" alt="image-20230222103615106" style="zoom:50%;" />
+
+- 模式说明：在该模式下，我们会为目标 Activity 创建一个新的 Task 栈，将目标 Activity 放入新的 Task，并让目标Activity获得焦点。新的 Task 有且只有这一个 Activity 实例。 如果已经创建过目标 Activity 实例，则不会创建新的 Task，而是将以前创建过的 Activity 唤醒。
+
+#### 2. 标志取值
+
+##### 1）XML
+
+- **AndroidManifest.xml** -> **android:launchMode**
+- `standard`、 `singleTop`、`singleTask`、`singleInstance`
+
+##### 2）Java
+
+- Intent.setFlags()
+
+- | Intent类的启动标志                                       |  说明    |
+  | ------------------------------------------------------------ | ---- |
+  | Intent.FLAG_ACTIVITY_NEW_TASK |   开辟一个新的任务栈，该值类似于launchMode="standard";不同之处在于，如果原来不存在活动栈，则FLAG_ACTIVITY_NEW_TASK会创建一个新栈   |
+  |Intent.FLAG_ACTIVITY_SINGLE_TOP | 当栈顶为待跳转的活动实例之时，则重用栈顶的实例。该值等同于launchMode="singleTop" |
+  | Intent.FLAG_ACTIVITY_CLEAR_TOP | 当栈中存在待跳转的活动实例时，则重新创建一个新实例，并清除原实例上方的所有实例。该值与launchMode="singleTask"类似，但singleTask采取onNewIntent方法启用原任务，而FLAG_ACTIVITY_CLEAR_TOP采取先调用onDestroy再调用onCreate来创建新任务 |
+  | Intent.FLAG_ACTIVITY_NO_HISTORY | 该标志与launchMode="standard"情况类似，但栈中不保存新启动的活动实例。这样下次无论以何种方式再启动该实例，也要走standard模式的完整流程 |
+  |Intent.FLAG_ACTIVITY_CLEAR_TASK | 该标志非常暴力，跳转到新页面时，栈中的原有实例都被清空。注意该标志需要结合FLAG_ACTIVITY_NEW_TASK使用，即setFlags方法的参数为"Intent.FLAG_ACTIVITY_CLEAR_TASK" |
+
+#### 3. example
+
+1) A->B->A->B->.... 不会重复返回 —> `Intent.FLAG_ACTIVITY_CLEAR_TOP`
+
+2) 登录页面等无需再次返回的页面 —> `Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK`
+
+   - 关闭活动栈后 需要新建栈
+
+   - ```java
+         @Override
+         public void onClick(View v) {
+             Intent intent = new Intent(this, LogSuccessActivity.class);
+             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+             startActivity(intent);
+         }
+     ```
+
+     
+
+#### 4.动态设置 > 静态设置
+
+## 4.2 在活动之间传递消息
+
+### 4.2.1 显式Intent和隐式Intent
+
+- 作用：
+
+  1. 标明本次通信请求从哪里来、到哪里去、要怎么走。
+  2. 发起方携带本次通信需要的数据内容，接收方从收到的意图中解析数据。
+  3. 发起方若想判断接收方的处理结果，意图就要负责让接收方传回应答的数据内容。
+
+- 组成：
+
+  - | **元素名称** | **设置方法** | 说明和用途 |
+    | ------------ | ------------ | ---------- |
+    | Component | setComponent | 组件，它指定意图的来源与目标 |
+    | Action | setAction | 动作，它指定意图的动作行为 |
+    | Data | setData | 即Uri，它指定动作要操纵的数据路径 |
+    | Category | addCategory | 类别，它指定意图的操作类别 |
+    | Type | setType | 数据类型，它指定消息的数据类型 |
+    | Extras | putExtras | 扩展信息，它指定装载的包裹信息 |
+    | Flags | setFlags | 标志位，它指定活动的启动标志 |
+
+#### 1. 显示Intent
+
+- 直接指定来源活动与目标活动，属于精确匹配
+
+- 构建方式：
+
+  1. 在Intent的构造函数中指定，示例代码如下：
+
+     > ```java
+     > Intent intent = new Intent(this, ActNextActivity.class); // 创建一个目标确定的意图
+     > ```
+
+  2. 调用意图对象的setClass方法指定，示例代码如下：
+
+     > ```java
+     > Intent intent = new Intent(); // 创建一个新意图
+     > intent.setClass(this, ActNextActivity.class); // 设置意图要跳转的目标活动
+     > ```
+
+  3. 调用意图对象的setComponent方法指定，示例代码如下：
+
+     > ```java
+     > Intent intent = new Intent(); // 创建一个新意图
+     > // 创建包含目标活动在内的组件名称对象
+     > ComponentName component = new ComponentName(this, ActNextActivity.class);
+     > intent.setComponent(component); // 设置意图携带的组件信息
+     > ```
+
+#### 2. 隐式Intent
+
+- 没有明确指定要跳转的目标活动，只给出一个动作字符串让系统自动匹配，属于模糊匹配
+
+- 常见系统动作的取值说明
+
+  | **Intent类的系统动作常量名** | **系统动作的常量值** | **说明** |
+  | ----- | ----- | ----- |
+  | ACTION_MAIN | android.intent.action.MAIN | App启动时的入口 |
+  | ACTION_VIEW | android.intent.action.VIEW | 向用户显示数据 |
+  | ACTION_SEND | android.intent.action.SEND | 分享内容 |
+  | ACTION_CALL | android.intent.action.CALL | 直接拨号 |
+  | ACITON_DIAL | android.intent.action.DIAL | 准备拨号 |
+  | ACTION_SENDTO | android.intent.action.SENDTO | 发送短信 |
+  | ACTION_ANSWER | android.intent.action.ANSWER | 接听电话 |
+
+- 可以通过setAction方法指定，也可以通过构造函数Intent(String action)直接生成意图对象
+
+- Uri和Category：指定路径和门类信息
+
+  - `Intent(String action, Uri uri)`	或	`setData`
+  - `addCategory()`
+
+#### 3. 示例
+
+```java
+// chapter 04 调用 chapter03
+// chapter 04： ActionUriActivity.java 
+public void onClick(View v) {
+        String phoneNum = "12345";
+        Intent intent = new Intent();
+        Uri uri = null;
+        switch (v.getId()){
+            case R.id.btn_uri_dial:
+                intent.setAction(Intent.ACTION_DIAL);
+                uri = Uri.parse("tel:" + phoneNum);
+                intent.setData(uri);
+                break;
+
+            case R.id.btn_uri_sms:
+                intent.setAction(Intent.ACTION_SENDTO);
+                uri = Uri.parse("smsto:" + phoneNum);
+                intent.setData(uri);
+                break;
+            case R.id.btn_uri_my:
+                intent.setAction("android.intent.action.NING");
+                intent.addCategory(Intent.CATEGORY_DEFAULT);
+                break;
+        }
+    startActivity(intent);
+    }
+
+// chapter03: AndroidManifest.xml
+        <activity
+            android:name=".CalculatorActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            // 增加部分
+            <intent-filter>
+                <action android:name="android.intent.action.NING" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            //增加部分
+        </activity>
+```
+
+### 4.2.2 向下一个Activity发送数据
+
+- `putExtras` & `getExtras`
+
+- `Bundle`
+
+  > ```java
+  > // Send.java
+  > public void onClick(View v) {
+  >     // 创建一个意图对象，准备跳到指定的活动页面
+  >     Intent intent = new Intent(this, ActReceiveActivity.class);
+  >     Bundle bundle = new Bundle(); // 创建一个新包裹
+  >     // 往包裹存入名为request_time的字符串
+  >     bundle.putString("request_time", DateUtil.getNowTime());
+  >     // 往包裹存入名为request_content的字符串
+  >     bundle.putString("request_content", tv_send.getText().toString());
+  >     intent.putExtras(bundle); // 把快递包裹塞给意图
+  >     startActivity(intent); // 跳转到意图指定的活动页面
+  > }
+  > 
+  > // Receive.java
+  > protected void onCreate(Bundle savedInstanceState) {
+  >         super.onCreate(savedInstanceState);
+  >         setContentView(R.layout.activity_action_receive);
+  >         findViewById(R.id.btn_receive_return).setOnClickListener(this);
+  >         // 从布局文件中获取名为tv_receive的文本视图
+  >         TextView tv_receive = findViewById(R.id.tv_receive);
+  >         // 从上一个页面传来的意图中获取快递包裹
+  >         Bundle bundle = getIntent().getExtras();
+  >         // 从包裹中取出名为request_time的字符串
+  >         String request_time = bundle.getString("request_time");
+  >         // 从包裹中取出名为request_content的字符串
+  >         String request_content = bundle.getString("request_content");
+  >         String desc = String.format("收到请求消息：\n请求时间为%s\n请求内容为%s",
+  >         request_time, request_content);
+  >         tv_receive.setText(desc); // 把请求消息的详情显示在文本视图上
+  > }
+  > ```
+
+### 4.2.3 向上一个Activity返回数据
+
+- (过时方法)处理下一个页面的应答数据，详细步骤说明如下：
+
+  - 上一个页面打包好请求数据，调用`startActivityForResult`方法执行跳转动作
+  - 下一个页面接收并解析请求数据，进行相应处理
+  - 下一个页面在返回上一个页面时，打包应答数据并调用`setResult`方法返回数据包裹
+  - 上一个页面重写方法`onActivityResult`, 解析获得下一个页面的返回数据
+
+- (最新方法)，详细步骤说明如下：
+
+  - 上一个页面打包好请求数据，调用`register.launch(intent)`方法执行跳转动作 -> 基于 `registerForActivityResult` 方法
+
+  - 下一个页面接收并解析请求数据，进行相应处理
+
+  - 下一个页面在返回上一个页面时，打包应答数据并调用`setResult(Activity.RESULT_OK, intent)`方法返回数据包裹
+
+  - 上一个页面重写方法`onActivityResult`, 解析获得下一个页面的返回数据
+
+    > ```java
+    > ActivityResultLauncher<Intent> register = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+    >             @Override
+    >             public void onActivityResult(ActivityResult result) {
+    >                 
+    >             }
+    >         })
+    >     
+    > // lambda方法
+    >     ActivityResultLauncher<Intent> register = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+    >             @Override
+    >             public void onActivityResult(ActivityResult result) {
+    > 
+    >             }
+    >         })
+    > ```
+
+- 示例
+
+  > ```java
+  > // Request
+  > public class ActRequestActivity extends AppCompatActivity implements View.OnClickListener {
+  >     private final String mRequest = "what's your phone number?";
+  >     private ActivityResultLauncher<Intent> register;
+  >     private TextView tv_response;
+  >     private TextView tv_request;
+  > 
+  >     @Override
+  >     protected void onCreate(Bundle savedInstanceState) {
+  >         super.onCreate(savedInstanceState);
+  >         setContentView(R.layout.activity_act_request);
+  >         tv_request = findViewById(R.id.tv_request_info);
+  >         tv_request.setText("待发送的数据为：" + mRequest);
+  >         tv_response = findViewById(R.id.tv_request);
+  > 
+  >         findViewById(R.id.btn_request).setOnClickListener(this);
+  >         register = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+  >             if (result != null){
+  >                 Intent intent = result.getData();
+  >                 if (intent != null && result.getResultCode() == Activity.RESULT_OK) {
+  >                     Bundle bundle = intent.getExtras();
+  >                     String response_time = bundle.getString("response_time");
+  >                     String response_content = bundle.getString("response_content");
+  >                     String desc = String.format("收到应答消息：...\n应答时间为: %s\n应答内容为: %s", response_time, response_content);
+  >                     tv_response.setText(desc);
+  >                 }
+  >             }
+  >         });
+  >     }
+  > 
+  >     @Override
+  >     public void onClick(View v) {
+  >         Intent intent = new Intent(this, ActResponseActivity.class);
+  >         Bundle bundle = new Bundle();
+  >         bundle.putString("request_time", dateUtil.getNowTime());
+  >         bundle.putString("request_content", mRequest);
+  >         intent.putExtras(bundle);
+  > //      过时
+  > //        startActivityForResult(intent, 0);
+  >         register.launch(intent);
+  >     }
+  > }
+  > 
+  > // Response
+  > public class ActResponseActivity extends AppCompatActivity implements View.OnClickListener {
+  >     private static String mMassage = "12345";
+  >     @Override
+  >     protected void onCreate(Bundle savedInstanceState) {
+  >         super.onCreate(savedInstanceState);
+  >         setContentView(R.layout.activity_act_response);
+  >         TextView tv_request_response = findViewById(R.id.tv_request_response);
+  >         Bundle bundle = getIntent().getExtras();
+  >         String request_time = bundle.getString("request_time");
+  >         String request_content = bundle.getString("request_content");
+  >         String desc = String.format("收到请求消息：...\n请求时间为: %s\n请求内容为: %s", request_time, request_content);
+  >         tv_request_response.setText(desc);
+  > 
+  >         findViewById(R.id.btn_response).setOnClickListener(this);
+  > 
+  >         TextView tv_response = findViewById(R.id.tv_response);
+  >         tv_response.setText("Response" + mMassage);
+  >     }
+  > 
+  >     @Override
+  >     public void onClick(View v) {
+  >         Intent intent = new Intent();
+  >         Bundle bundle = new Bundle();
+  >         bundle.putString("response_time", dateUtil.getNowTime());
+  >         bundle.putString("response_content", mMassage);
+  >         intent.setClass(this, ActRequestActivity.class);
+  >         intent.putExtras(bundle);
+  >         setResult(Activity.RESULT_OK, intent);
+  >         finish();
+  >     }
+  > }
+  > ```
+  >
+  > 
+
+## 4.3 为Activity补充附加信息
+
+### 4.3.1 利用资源文件配置字符串
+
+> ```java
+> public class ActResponseActivity extends AppCompatActivity implements View.OnClickListener {
+>     private static String mMassage = "12345";
+>     @Override
+>     protected void onCreate(Bundle savedInstanceState) {
+>         super.onCreate(savedInstanceState);
+>         setContentView(R.layout.activity_act_response);
+>         TextView tv_request_response = findViewById(R.id.tv_request_response);
+>         Bundle bundle = getIntent().getExtras();
+>         String request_time = bundle.getString("request_time");
+>         String request_content = bundle.getString("request_content");
+>         String desc = String.format("收到请求消息：...\n请求时间为: %s\n请求内容为: %s", request_time, request_content);
+>         tv_request_response.setText(desc);
+> 
+>         findViewById(R.id.btn_response).setOnClickListener(this);
+> 
+>         TextView tv_response = findViewById(R.id.tv_response);
+>         tv_response.setText("Response" + mMassage);
+>     }
+> 
+>     @Override
+>     public void onClick(View v) {
+>         Intent intent = new Intent();
+>         Bundle bundle = new Bundle();
+>         bundle.putString("response_time", dateUtil.getNowTime());
+>         bundle.putString("response_content", mMassage);
+>         intent.setClass(this, ActRequestActivity.class);
+>         intent.putExtras(bundle);
+>         setResult(Activity.RESULT_OK, intent);
+>         finish();
+>     }
+> }
+> ```
+
+### 4.3.2 利用元数据传递配置信息
+
+- xml代码
+
+  - > ```xml
+    > // AndroidManifest.xml
+    > // simple
+    > <meta-data android:name="weather" android:value="晴天"/>
+    > 
+    > // other
+    > <activity android:name=".MetaDataActivity">
+    > <meta-data
+    > android:name="weather"
+    > android:value="@string/weather_str" />
+    > </activity>
+    > ```
+    >
+    > 
+
+- java代码步骤
+  1. 调用getPackageManager方法获得当前应用的包管理器。
+  2. 调用包管理器的getActivityInfo方法获得当前活动的信息对象。
+  3. 活动信息对象的metaData是Bundle包裹类型，调用包裹对象的getString即可获得指定名称的参数值。
+  - > ```java
+    >         TextView tv_meta = findViewById(R.id.tv_meta);
+    >         PackageManager pm = getPackageManager();
+    >         try {
+    >             ActivityInfo info = pm.getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
+    >             Bundle bundle = info.metaData;
+    >             String weather = bundle.getString("weather");
+    >             tv_meta.setText(weather);
+    >         } catch (PackageManager.NameNotFoundException e) {
+    >             throw new RuntimeException(e);
+    >         }
+    > ```
+
+### 4.3.3 给App页面注册快捷方式
+
+- src/main/res/xml(新建)/shortcuts.xml
+
+  - > ```xml
+    > <?xml version="1.0" encoding="utf-8"?>
+    > <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    >     <shortcut
+    >         android:enabled="true"
+    >         android:shortcutId="first"
+    >         android:shortcutLongLabel="@string/first_long"
+    >         android:shortcutShortLabel="@string/first_short"
+    >         android:src="@mipmap/ic_launcher">
+    > 
+    >         <intent
+    >             android:action="android.intent.action.VIEW"
+    >             android:targetClass="com.example.chapter04.ActStartActivity"
+    >             android:targetPackage="com.example.chapter04" />
+    >         <categories android:name="android:shortcut.conversation" />
+    >     </shortcut>
+    > 
+    >     <shortcut
+    >         android:enabled="true"
+    >         android:shortcutId="second"
+    >         android:shortcutLongLabel="@string/second_long"
+    >         android:shortcutShortLabel="@string/second_short"
+    >         android:src="@mipmap/ic_launcher">
+    > 
+    >         <intent
+    >             android:action="android.intent.action.VIEW"
+    >             android:targetClass="com.example.chapter04.JumpFirstActivity"
+    >             android:targetPackage="com.example.chapter04" />
+    >         <categories android:name="android:shortcut.conversation" />
+    >     </shortcut>
+    > 
+    >     <shortcut
+    >         android:enabled="true"
+    >         android:shortcutId="third"
+    >         android:shortcutLongLabel="@string/third_long"
+    >         android:shortcutShortLabel="@string/third_short"
+    >         android:src="@mipmap/ic_launcher">
+    > 
+    >         <intent
+    >             android:action="android.intent.action.VIEW"
+    >             android:targetClass="com.example.chapter04.LogInputActivity"
+    >             android:targetPackage="com.example.chapter04" />
+    >         <categories android:name="android:shortcut.conversation" />
+    >     </shortcut>
+    > 
+    > </shortcuts>
+    > ```
+
+- AndroidManifest.xml
+
+  - > ```xml
+    >         <activity
+    >             android:name=".ActStartActivity"
+    >             android:exported="true">
+    >             <intent-filter>
+    >                 <action android:name="android.intent.action.MAIN" />
+    >                 <category android:name="android.intent.category.LAUNCHER" />
+    >             </intent-filter>
+    >  <!-- 指定快捷方式。在桌面上长按应用图标，就会弹出@xml/shortcuts所描述的快捷菜单 -->
+    >             <meta-data
+    >                 android:name="android.app.shortcuts"
+    >                 android:resource="@xml/shortcuts"/>
+    >         </activity>
+    > ```
+
+  - **注意：** 调用Activity的 `android:exported` 应该设置为 `true` -> 可以由其他应用打开
+
+    - > ```xml
+      > // e.g.
+      > <activity
+      >             android:name=".JumpFirstActivity"
+      >             android:exported="true" />
+      > <activity
+      >             android:name=".JumpSecondActivity"
+      >             android:exported="false" />
+      >         
+      > ```
+
+- 节点属性说明：
+  - shortcutId：快捷方式的编号。
+  - enabled：是否启用快捷方式。true表示启用，false表示禁用。
+  - icon：快捷菜单左侧的图标。
+  - shortcutShortLabel：快捷菜单的短标签。
+  - shortcutLongLabel：快捷菜单的长标签。优先展示长标签的文本，长标签放不下时才展示短标签的文本。
+- 跳转动作由 `intent` 节点定义，主要有两个属性修改
+  - targetPackage属性固定为当前App的包名
+  - targetClass属性描述了菜单项对应的活动类完整路径
+
+# 5. 中级控件
+
+## 5.1 图形定制
+
+### 5.1.1 图形Drawable
+
+- Android把**所有能够显示的图形**都抽象为**Drawable**类（可绘制的）。这里的图形不止是图片，还包括色块、画板、背景等。
+- 包含图片在内的图形文件放在res目录的各个drawable目录下，其中drawable目录一般保存描述性的XML文件，而图片文件一般放在具体分辨率的drawable目录下。例如：
+  1. drawable-ldpi里面存放低分辨率的图片（如240×320），现在基本没有这样的智能手机了。
+  2. drawable-mdpi里面存放中等分辨率的图片（如320×480），这样的智能手机已经很少了。
+  3. drawable-hdpi里面存放高分辨率的图片（如480×800），一般对应4英寸～4.5英寸的手机（但不绝对，同尺寸的手机有可能分辨率不同，手机分辨率就高不就低，因为分辨率低了屏幕会有模糊的感觉）。
+  4. drawable-xhdpi里面存放加高分辨率的图片（如720×1280），一般对应5英寸～5.5英寸的手机。
+  5. drawable-xxhdpi里面存放超高分辨率的图片（如1080×1920），一般对应6英寸～6.5英寸的手机。
+  6. drawable-xxxhdpi里面存放超超高分辨率的图片（如1440×2560），一般对应7英寸以上的平板电脑。
+
+- 基本上，分辨率每加大一级，宽度和高度就要增加二分之一或三分之一像素
+
+### 5.1.2 形状图形
+
+- 包括矩形、圆角矩形、圆形、椭圆等;
+- 是以shape标签为根节点的XML描述文件。根节点下定义了6个节点，分别是：size（尺寸）、stroke（描边）、corners（圆角）、solid（填充）、padding（间隔）、gradient（渐变）;
+- 实际开发主要使用3个节点: stroke(描边)、corners(圆角)、solid(填充)
+
+#### 1.  shape(形状)
+
+- `string`
+
+| 形状类型  | 说明                               |
+| --------- | ---------------------------------- |
+| rectangle | 矩形(defauklt)                     |
+| oval      | 椭圆(corners节点失效)              |
+| line      | 直线(必须设置stroke节点，否则报错) |
+| ring      | 圆环                               |
+
+#### 2. size(尺寸)
+
+- 宽高尺寸(不设置，则宽高与宿主视图一样大小)
+  - height: 像素类型，图形高度
+  - width: 像素类型，图形宽度
+
+#### 3. stroke（描边）
+
+- 描边规格(不设置，则不存在描边)
+  - color：颜色类型，描边的颜色。
+  - dashGap：像素类型，每段虚线之间的间隔。
+  - dashWidth：像素类型，每段虚线的宽度。若dashGap和dashWidth有一个值为0，则描边为实线。
+  - width：像素类型，描边的厚度。
+
+#### 4. corners（圆角）
+
+- 圆角大小(不设置，则没有圆角)
+  - bottomLeftRadius：像素类型，左下圆角的半径。
+  - bottomRightRadius：像素类型，右下圆角的半径。
+  - topLeftRadius：像素类型，左上圆角的半径。
+  - topRightRadius：像素类型，右上圆角的半径。
+  - radius：像素类型，4个圆角的半径（若有上面4个圆角半径的定义，则不需要radius定义）。
+
+#### 5. solid（填充）
+
+- 填充色彩(不设置，则无填充颜色)
+  - color：颜色类型，内部填充的颜色
+
+#### 6. padding（间隔）
+
+- 形状图形与周围边界的间隔(不设置，则不设间隔)
+  - top：像素类型，与上方的间隔。
+  - bottom：像素类型，与下方的间隔。
+  - left：像素类型，与左边的间隔。
+  - right：像素类型，与右边的间隔。
+
+#### 7. gradient（渐变）
+
+- 颜色渐变(不设置，则没有渐变效果)
+
+  - angle：整型，渐变的起始角度。为0时表示时钟的9点位置，值增大表示往逆时针方向旋转。例如，值为90表示6点位置，值为180表示3点位置，值为270表示0点/12点位置。
+
+  - type：字符串类型，渐变类型。渐变类型的取值说明见表：
+
+    - | 渐变类型 | 说明 |
+      | :--: | ---- |
+      | linear | 线性渐变，默认值 |
+      | radial | 放射渐变，起始颜色就是圆心颜色 |
+      | sweep | 滚动渐变，即一个线段以某个端点为圆心做360度旋转 |
+  
+  - centerX：浮点型，圆心的X坐标。当android:type="linear"时不可用。
+  
+  - centerY：浮点型，圆心的Y坐标。当android:type="linear"时不可用。
+  
+  - gradientRadius：整型，渐变的半径。当android:type="radial"时需要设置该属性。
+  
+  - centerColor：颜色类型，渐变的中间颜色。
+  
+  - startColor：颜色类型，渐变的起始颜色。
+  
+  - endColor：颜色类型，渐变的终止颜色。
+  
+  - useLevel：布尔类型，设置为true为无渐变色、false为有渐变色。
+
+### 5.1.3 九宫格图片(点9图片)
+
+- `ButtonRight` - Create 9-Patch file...
+
+![image-20230222191129788](https://s2.loli.net/2023/02/22/hZ7d6rmzfFlXHOi.png)
+
+### 5.1.4 状态列表图形
+
+- Drawable -> StateListDrawable(状态列表图形)
+
+- /drable/
+
+- 状态类型取值：
+
+  - | 状态类型的属性名称 | 说明         | 适用的组件                          |
+    | ------------------ | ------------ | ----------------------------------- |
+    | state_pressed      | 是否按下     | 按钮Button                          |
+    | state_checked      | 是否勾选     | 复选框CheckBox、单选按钮RadioButton |
+    | state_focused      | 是否获取焦点 | 文本编辑框EditText                  |
+    | state_selected     | 是否选中     | 各控件通用                          |
+
+## 5.2 选择按钮
+
+![image-20230222194248260](https://s2.loli.net/2023/02/22/xKzLfCXgGoAQVZ2.png)
+
+- CompoundButton在XML中两个主要属性
+  1. checked：指定按钮的勾选状态，true表示勾选，false则表示未勾选。默认为未勾选。
+  2. button：指定左侧勾选图标的图形资源，如果不指定就使用系统的默认图标。
+- CompoundButton在Java中四个主要方法
+  1. setChecked：设置按钮的勾选状态。
+  2. setButtonDrawable：设置左侧勾选图标的图形资源。
+  3. setOnCheckedChangeListener：设置勾选状态变化的监听器。
+  4. isChecked：判断按钮是否勾选。
+
+### 5.2.1 复选框CheckBox
+
+- 点击复选框将它勾选，再次点击取消勾选
+
+- 复选框对象调用setOnCheckedChangeListener方法设置勾选监听器
+
+- XML
+
+  - > ```xml
+    > <CheckBox
+    >         android:id="@+id/ck_system"
+    >         android:layout_width="match_parent"
+    >         android:layout_height="wrap_content"
+    >         android:padding="5dp"
+    >         android:text="系统自带复选框" />
+    > 
+    >     <CheckBox
+    >         android:id="@+id/ck_custom"
+    >         android:layout_width="match_parent"
+    >         android:layout_height="wrap_content"
+    >         android:layout_marginTop="10dp"
+    >         android:button="@drawable/checkbox_selector"
+    >         android:checked="true"
+    >         android:padding="5dp"
+    >         android:text="自制复选框" />
+    > ```
+
+- Java
+
+  - > ```java
+    > 	@Override    
+    > 	protected void onCreate(Bundle savedInstanceState) {
+    >         super.onCreate(savedInstanceState);
+    >         setContentView(R.layout.activity_check_box);
+    >         CheckBox ck_system = findViewById(R.id.ck_system);
+    >         CheckBox ck_custom = findViewById(R.id.ck_custom);
+    > 
+    >         ck_system.setOnCheckedChangeListener(this);
+    >         ck_custom.setOnCheckedChangeListener(this);
+    >     }
+    > 
+    >     @Override
+    >     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+    >         String desc = String.format("You %s this CheckBox", isChecked ? "chose" : "didn't choose");
+    >         buttonView.setText(desc);
+    >     }
+    > ```
+
+### 5.2.2 开关按钮Switch
+
+### 5.2.3 单选按钮RadioButton
+
+- RadioGroup -> 类似于线形布局
+
+  - 单选组多了管理单选按钮的功能，而线性布局不具备该功能。
+  - 如果不指定orientation属性，那么单选组默认垂直排列，而线性布局默认水平排列
+
+- 常用方法：
+
+  1. check：选中指定资源编号的单选按钮。
+  2. getCheckedRadioButtonId：获取已选中单选按钮的资源编号。
+  3. setOnCheckedChangeListener：设置单选按钮勾选变化的监听器。
+
+- RadioButton默认未选中，点击后显示选中，但是再次点击不会取消选中。只有点击同组的其他单选按钮时，原来选中的单选按钮才会取消选中；另需注意，单选按钮的选中事件不是由RadioButton处理，而是由RadioGroup处理。
+
+- > ```xml
+  > <?xml version="1.0" encoding="utf-8"?>
+  > <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  >     android:layout_width="match_parent"
+  >     android:layout_height="match_parent"
+  >     android:orientation="vertical">
+  > 
+  >     <TextView
+  >         android:layout_width="match_parent"
+  >         android:layout_height="wrap_content"
+  >         android:gravity="left|center"
+  >         android:padding="5dp"
+  >         android:text="请选择类别："
+  >         android:textColor="@color/black"
+  >         android:textSize="20dp" />
+  > 
+  > 
+  >     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  >         android:layout_width="match_parent"
+  >         android:layout_height="150dp">
+  > 
+  >         <RadioGroup
+  >             android:id="@+id/radio_group"
+  >             android:layout_width="wrap_content"
+  >             android:layout_height="120dp"
+  >             android:layout_alignParentLeft="true"
+  >             android:layout_centerVertical="true"
+  >             android:layout_marginLeft="40dp">
+  > 
+  >             <RadioButton
+  >                 android:id="@+id/rb_first"
+  >                 android:layout_width="wrap_content"
+  >                 android:layout_height="0dp"
+  >                 android:layout_weight="1"
+  >                 android:text="类别一"
+  >                 android:textColor="@color/black"
+  >                 android:textSize="20dp" />
+  > 
+  >             <RadioButton
+  >                 android:id="@+id/rb_second"
+  >                 android:layout_width="wrap_content"
+  >                 android:layout_height="0dp"
+  >                 android:layout_weight="1"
+  >                 android:text="类别二"
+  >                 android:textColor="@color/black"
+  >                 android:textSize="20dp" />
+  > 
+  >             <RadioButton
+  >                 android:id="@+id/rb_third"
+  >                 android:layout_width="wrap_content"
+  >                 android:layout_height="0dp"
+  >                 android:layout_weight="1"
+  >                 android:text="类别三"
+  >                 android:textColor="@color/black"
+  >                 android:textSize="20dp" />
+  >         </RadioGroup>
+  > 
+  >         <TextView
+  >             android:id="@+id/tv_radio_result"
+  >             android:layout_width="wrap_content"
+  >             android:layout_height="wrap_content"
+  >             android:layout_alignParentRight="true"
+  >             android:layout_centerVertical="true"
+  >             android:layout_marginLeft="20dp"
+  >             android:layout_marginRight="40dp"
+  >             android:layout_toRightOf="@+id/radio_group"
+  >             android:gravity="center"
+  >             android:text="您选择了类别一"
+  >             android:textColor="@color/black"
+  >             android:textSize="20dp" />
+  >     </RelativeLayout>
+  > </LinearLayout>
+  > ```
+
+## 5.3 文本输入
+
+### 5.3.1 编辑框EditText
+
+- 用于TextView已有的各种属性外，还有：
+
+  1. inputType：指定输入的文本类型。输入类型的取值说明见表，若同时使用多种文本类型，则可使用竖线“|”把多种文本类型拼接起来。
+
+     - | 输入类型 | 说明 |
+       | --- | --- |
+      |text |文本|
+      |textPassword |文本密码。显示时用圆点“·”代替|
+      |number |整型数|
+      |numberSigned |带符号的数字。允许在开头带负号“－”|
+      |numberDecimal |带小数点的数字|
+      |numberPassword |数字密码。显示时用圆点“·”代替|
+      |datetime |时间日期格式。除了数字外，还允许输入横线、斜杆、空格、冒号|
+      |date |日期格式。除了数字外，还允许输入横线“-”和斜杆“/”|
+      |time |时间格式。除了数字外，还允许输入冒号“:”|
+
+  2. maxLength：指定文本允许输入的最大长度。
+
+  3. hint：指定提示文本的内容。
+
+  4. textColorHint：指定提示文本的颜色。
+
+- > ```xml
+  > <?xml version="1.0" encoding="utf-8"?>
+  > <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  >     android:layout_width="match_parent"
+  >     android:layout_height="match_parent"
+  >     android:orientation="vertical"
+  >     android:padding="10dp">
+  > 
+  >     <TextView
+  >         android:id="@+id/tv_edit_info"
+  >         android:layout_width="match_parent"
+  >         android:layout_height="wrap_content"
+  >         android:background="@drawable/button_pressed"
+  >         android:gravity="center"
+  >         android:text="Log in..."
+  >         android:textColor="@color/black"
+  >         android:textSize="30dp" />
+  > 
+  >     <EditText
+  >         android:layout_width="match_parent"
+  >         android:layout_height="wrap_content"
+  >         android:layout_margin="10dp"
+  >         android:hint="请输入用户名."
+  >         android:inputType="text"
+  >         android:paddingLeft="20dp"
+  >         android:textColor="@color/black"
+  >         android:textColorHint="@color/gray" />
+  > 
+  > 
+  >     <EditText
+  >         android:layout_width="match_parent"
+  >         android:layout_height="wrap_content"
+  >         android:hint="请输入密码."
+  >         android:inputType="numberPassword"
+  >         android:paddingLeft="20dp"
+  >         android:layout_margin="10dp"
+  >         android:textColor="@color/black"
+  >         android:textColorHint="@color/gray" />
+  > 
+  >     <EditText
+  >         android:layout_width="match_parent"
+  >         android:layout_height="wrap_content"
+  >         android:layout_margin="10dp"
+  >         android:background="@null"
+  >         android:hint="没有边框的编辑框"
+  >         android:inputType="text"
+  >         android:paddingLeft="20dp"
+  >         android:textColor="@color/black"
+  >         android:textColorHint="@color/gray" />
+  > 
+  >     <EditText
+  >         android:layout_width="match_parent"
+  >         android:layout_height="wrap_content"
+  >         android:layout_margin="10dp"
+  >         android:background="@drawable/editext_selector"
+  >         android:hint="圆角边框的编辑框"
+  >         android:inputType="text"
+  >         android:paddingLeft="20dp"
+  >         android:textColor="@color/black"
+  >         android:textColorHint="@color/gray" />
+  > 
+  > </LinearLayout>
+  > ```
+
+### 5.3.2 焦点变更监听
+
+- 编辑框比较特殊，**要点击两次后才会触发点击事件**，因为第一次点击只触发焦点变更事件，第二次点击才触发点击事件。编辑框的所谓焦点，直观上就看那个闪动的光标，哪个编辑框有光标，焦点就落在哪里。光标在编辑框之间切换，便产生了焦点变更事件，所以对于编辑框来说，应当注**册焦点变更监听器**，而非注册点击监听器。
+
+- > ```java
+  > et_password.setOnFocusChangeListener(this);
+  > 
+  >     @Override
+  >     public void onFocusChange(View v, boolean hasFocus) {
+  >         String phoneNum = et_phone.getText().toString();
+  >         if (TextUtils.isEmpty(phoneNum) || phoneNum.length() < 11) {
+  >             et_phone.requestFocus();
+  >             Toast.makeText(this, "请输入11位手机号码", Toast.LENGTH_SHORT).show();
+  >             tv_edit_judge.setText("请输入11位手机号码");
+  >         } else {
+  >             tv_edit_judge.setText("请输入密码");
+  >         }
+  >     }
+  > ```
+
+### 5.3.3 文本变化监听
+
+
+
+## 5.4 对话框
+
+
+
+## 5.5 找回密码(训练)
+
