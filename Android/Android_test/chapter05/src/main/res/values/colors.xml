@@ -11,8 +11,9 @@
     <color name="red">#ff0000</color>
     <color name="yellow">#ffff00</color>
     <color name="cyan">#00ffff</color>
+    <color name="grey">#888888</color>
+    <color name="darkGrey">#434343</color>
+    <color name="lightGrey">#B8B8B8</color>
     <color name="gray">#888888</color>
-    <color name="darkGray">#434343</color>
-    <color name="lightGray">#B8B8B8</color>
 
 </resources>

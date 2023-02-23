@@ -23,7 +23,7 @@
         android:inputType="text"
         android:paddingLeft="20dp"
         android:textColor="@color/black"
-        android:textColorHint="@color/gray" />
+        android:textColorHint="@color/grey" />
 
 
     <EditText
@@ -34,7 +34,7 @@
         android:paddingLeft="20dp"
         android:layout_margin="10dp"
         android:textColor="@color/black"
-        android:textColorHint="@color/gray" />
+        android:textColorHint="@color/grey" />
 
     <EditText
         android:layout_width="match_parent"
@@ -45,7 +45,7 @@
         android:inputType="text"
         android:paddingLeft="20dp"
         android:textColor="@color/black"
-        android:textColorHint="@color/gray" />
+        android:textColorHint="@color/grey" />
 
     <EditText
         android:layout_width="match_parent"
@@ -56,6 +56,6 @@
         android:inputType="text"
         android:paddingLeft="20dp"
         android:textColor="@color/black"
-        android:textColorHint="@color/gray" />
+        android:textColorHint="@color/grey" />
 
 </LinearLayout>

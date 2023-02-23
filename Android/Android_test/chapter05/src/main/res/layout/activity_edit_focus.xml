@@ -24,7 +24,7 @@
         android:maxLength="11"
         android:paddingLeft="20dp"
         android:textColor="@color/black"
-        android:textColorHint="@color/gray" />
+        android:textColorHint="@color/grey" />
 
     <EditText
         android:id="@+id/et_password"
@@ -37,7 +37,7 @@
         android:maxLength="6"
         android:paddingLeft="20dp"
         android:textColor="@color/black"
-        android:textColorHint="@color/gray" />
+        android:textColorHint="@color/grey" />
 
     <Button
         android:id="@+id/btn_edit_log"
@@ -59,7 +59,7 @@
         android:gravity="bottom|center"
         android:paddingBottom="50dp"
         android:text="请输入个人信息"
-        android:textColor="@color/darkGray"
+        android:textColor="@color/darkGrey"
         android:textSize="15dp" />
 
 </LinearLayout>
