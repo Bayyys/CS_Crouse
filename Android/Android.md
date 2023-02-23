@@ -1696,12 +1696,12 @@ public void onClick(View v) {
 
 - Android把**所有能够显示的图形**都抽象为**Drawable**类（可绘制的）。这里的图形不止是图片，还包括色块、画板、背景等。
 - 包含图片在内的图形文件放在res目录的各个drawable目录下，其中drawable目录一般保存描述性的XML文件，而图片文件一般放在具体分辨率的drawable目录下。例如：
-  1. drawable-ldpi里面存放低分辨率的图片（如240×320），现在基本没有这样的智能手机了。
-  2. drawable-mdpi里面存放中等分辨率的图片（如320×480），这样的智能手机已经很少了。
-  3. drawable-hdpi里面存放高分辨率的图片（如480×800），一般对应4英寸～4.5英寸的手机（但不绝对，同尺寸的手机有可能分辨率不同，手机分辨率就高不就低，因为分辨率低了屏幕会有模糊的感觉）。
-  4. drawable-xhdpi里面存放加高分辨率的图片（如720×1280），一般对应5英寸～5.5英寸的手机。
-  5. drawable-xxhdpi里面存放超高分辨率的图片（如1080×1920），一般对应6英寸～6.5英寸的手机。
-  6. drawable-xxxhdpi里面存放超超高分辨率的图片（如1440×2560），一般对应7英寸以上的平板电脑。
+ > 1. drawable-ldpi里面存放低分辨率的图片（如240×320），现在基本没有这样的智能手机了。
+ > 2. drawable-mdpi里面存放中等分辨率的图片（如320×480），这样的智能手机已经很少了。
+ > 3. drawable-hdpi里面存放高分辨率的图片（如480×800），一般对应4英寸～4.5英寸的手机（但不绝对，同尺寸的手机有可能分辨率不同，手机分辨率就高不就低，因为分辨率低了屏幕会有模糊的感觉）。
+ > 4. drawable-xhdpi里面存放加高分辨率的图片（如720×1280），一般对应5英寸～5.5英寸的手机。
+ > 5. drawable-xxhdpi里面存放超高分辨率的图片（如1080×1920），一般对应6英寸～6.5英寸的手机。
+ > 6. drawable-xxxhdpi里面存放超超高分辨率的图片（如1440×2560），一般对应7英寸以上的平板电脑。
 
 - 基本上，分辨率每加大一级，宽度和高度就要增加二分之一或三分之一像素
 
@@ -1762,29 +1762,22 @@ public void onClick(View v) {
 
 - 颜色渐变(不设置，则没有渐变效果)
 
-  - angle：整型，渐变的起始角度。为0时表示时钟的9点位置，值增大表示往逆时针方向旋转。例如，值为90表示6点位置，值为180表示3点位置，值为270表示0点/12点位置。
-
-  - type：字符串类型，渐变类型。渐变类型的取值说明见表：
-
-    - | 渐变类型 | 说明 |
-      | :--: | ---- |
-      | linear | 线性渐变，默认值 |
-      | radial | 放射渐变，起始颜色就是圆心颜色 |
-      | sweep | 滚动渐变，即一个线段以某个端点为圆心做360度旋转 |
-  
-  - centerX：浮点型，圆心的X坐标。当android:type="linear"时不可用。
-  
-  - centerY：浮点型，圆心的Y坐标。当android:type="linear"时不可用。
-  
-  - gradientRadius：整型，渐变的半径。当android:type="radial"时需要设置该属性。
-  
-  - centerColor：颜色类型，渐变的中间颜色。
-  
-  - startColor：颜色类型，渐变的起始颜色。
-  
-  - endColor：颜色类型，渐变的终止颜色。
-  
-  - useLevel：布尔类型，设置为true为无渐变色、false为有渐变色。
+  > - angle：整型，渐变的起始角度。为0时表示时钟的9点位置，值增大表示往逆时针方向旋转。例如，值为90表示6点位置，值为180表示3点位置，值为270表示0点/12点位置。
+  >
+  > - type：字符串类型，渐变类型。渐变类型的取值说明见表：
+  >
+  >   - | 渐变类型 | 说明 |
+  >     | :--: | ---- |
+  >     | linear | 线性渐变，默认值 |
+  >     | radial | 放射渐变，起始颜色就是圆心颜色 |
+  >     | sweep | 滚动渐变，即一个线段以某个端点为圆心做360度旋转 |
+  > - centerX：浮点型，圆心的X坐标。当android:type="linear"时不可用。
+  > - centerY：浮点型，圆心的Y坐标。当android:type="linear"时不可用。
+  > - gradientRadius：整型，渐变的半径。当android:type="radial"时需要设置该属性。
+  > - centerColor：颜色类型，渐变的中间颜色。
+  > - startColor：颜色类型，渐变的起始颜色。
+  > - endColor：颜色类型，渐变的终止颜色。
+  > - useLevel：布尔类型，设置为true为无渐变色、false为有渐变色。
 
 ### 5.1.3 九宫格图片(点9图片)
 
@@ -1874,8 +1867,8 @@ public void onClick(View v) {
 
 - RadioGroup -> 类似于线形布局
 
-  - 单选组多了管理单选按钮的功能，而线性布局不具备该功能。
-  - 如果不指定orientation属性，那么单选组默认垂直排列，而线性布局默认水平排列
+  > - 单选组多了管理单选按钮的功能，而线性布局不具备该功能。
+  > - 如果不指定orientation属性，那么单选组默认垂直排列，而线性布局默认水平排列
 
 - 常用方法：
 
@@ -2183,11 +2176,9 @@ public void onClick(View v) {
 
 ### 5.4.2 日期对话框DatePickerDialog
 
-- DatePicker并非弹窗模式，而是在当前页面占据一块区域，并且不会自动关闭。—— 日期控件应该弹出对话框，选择完日期就要自动关闭对话框。因此，利用已经封装好的日期选择对话框DatePickerDialog！
-
-- 编码时只需调用构造方法设置当前的年、月、日，然后调用show方法即可弹出日期对话框。日期选择事件则由监听器OnDateSetListener负责响应，在该监听器的onDateSet方法中，开发者获取用户选择的具体日期，再做后续处理。
-
-- 特别注意onDateSet的月份参数，它的起始值不是1而是0。也就是说，一月份对应的参数值为0，十二月份对应的参数值为11，中间月份的数值以此类推。
+> - DatePicker并非弹窗模式，而是在当前页面占据一块区域，并且不会自动关闭。—— 日期控件应该弹出对话框，选择完日期就要自动关闭对话框。因此，利用已经封装好的日期选择对话框DatePickerDialog！
+> - 编码时只需调用构造方法设置当前的年、月、日，然后调用show方法即可弹出日期对话框。日期选择事件则由监听器OnDateSetListener负责响应，在该监听器的onDateSet方法中，开发者获取用户选择的具体日期，再做后续处理。
+> - 特别注意onDateSet的月份参数，它的起始值不是1而是0。也就是说，一月份对应的参数值为0，十二月份对应的参数值为11，中间月份的数值以此类推。
 
 - `datePicker` :
 
@@ -2264,4 +2255,369 @@ public void onClick(View v) {
       > ```
 
 ## 5.5 找回密码(训练)
+
+# 6. 数据存储
+
+## 6.1 共享参数SharedPreferences
+
+### 6.1.1 共享参数的用法
+
+- 以XML文件为存储以介质，且以XML标记保存Key-Value键值对; 保存共享参数键值对信息的文件路径为: `/data/data/应用包名/shared_prefs/文件名.xm`
+
+  - > ```xml
+    > <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+    > <map>
+    >     <string name="name">Mr Lee</string>
+    >     <int nane="age" value="30"/>
+    >     <boolean name="married" value="true" />
+    >     <float name="weight" value="100.0"/>
+    > </map>
+    > ```
+
+- 应用场景: 
+
+  > 1. 简单且孤立的数据。若是复杂且相互关联的数据，则要保存于关系数据库。
+  > 2. 文本形式的数据。若是二进制数据，则要保存至文件。
+  > 3. 需要持久化存储的数据。App退出后再次启动时，之前保存的数据仍然有效。
+
+- 实际应用：App的个性化配置信息、用户使用App的行为信息、临时需要保存的片段信息等；
+
+- 存
+
+  > ```java
+  > // 从share.xml获取共享参数实例
+  > SharedPreferences shared = getSharedPreferences("share", MODE_PRIVATE);
+  > 
+  > // 获得编辑器的对象
+  > SharedPreferences.Editor editor = shared.edit(); 
+  > editor.putString("name", "Mr Lee"); // 添加一个名为name的字符串参数
+  > editor.putInt("age", 30); // 添加一个名为age的整型参数
+  > editor.putBoolean("married", true); // 添加一个名为married的布尔型参数
+  > editor.putFloat("weight", 100f); // 添加一个名为weight的浮点数参数
+  > editor.commit(); // 提交编辑器中的修改
+  > ```
+
+- 取
+
+  > ```java
+  > String name = shared.getString ( "name.","");//从共享参数获取名为name的字符串
+  > int age = shared.getInt ("age",0);// 从共享参数获取名为age 的整型数
+  > boolean married = shared.getBoolean ( "married"， false);//从共享参数获取名为married
+  > 的布尔数
+  > float weight = shared.getFloat ( "weight"，0);//从共享参数获取名为weight的浮点数
+  > ```
+
+### 6.1.2 记住密码功能
+
+### 6.1.3 利用设备浏览器寻找共享参数文件
+
+![image-20230223144141133](https://s2.loli.net/2023/02/23/xmugc6hWYUK7eqa.png)
+
+## 6.2 数据库SQLite
+
+### 6.2.1 基本语法
+
+> - SQL本质上是一种编程语言，它的学名叫作“结构化查询语言”（全称为Structured Query Language，简称SQL）；
+> - SQL语言并非通用的编程语言，它专用于数据库的访问和处理，更像是一种操作命令，所以常说SQL语句而不说SQL代码；
+> - 标准的SQL语句分为3类：数据定义、数据操纵和数据控制；
+> - **数据定义** & **数据操纵**
+
+#### 1. 数据定义语言
+
+- DDL: Data Definition Language(数据定义语言) — 怎样变更数据实体的框架结构
+
+- 操作(增删改查)
+
+  1. 创建表格
+
+     - `CREATE TABLE IF NOT EXISTS table_name(key1, key2, ...);`
+
+     - ```sqlite
+       CREATE TABLE IF NOT EXISTS user_info (
+           _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+           name VARCHAR NOT NULL,
+           age INTEGER NOT NULL,
+           height LONG NOT NULL,
+           weight FLOAT NOT NULL,
+           married INTEGER NOT NULL,
+           update_time VARCHAR NOT NULL);
+       ```
+
+     - 说明
+
+       > 1. SQL语句不区分大小写，无论是create与table这类关键词，还是表格名称、字段名称，都不区分大小写。唯一区分大小写的是被单引号括起来的字符串值。
+       > 2. 为避免重复建表，应加上IF NOT EXISTS关键词，例如CREATE TABLE IF NOT EXISTS　表格名称……
+       > 3. SQLite支持整型INTEGER、长整型LONG、字符串VARCHAR、浮点数FLOAT，但不支持布尔类型。布尔类型的数据要使用整型保存，如果直接保存布尔数据，在入库时SQLite会自动将它转为0或1，其中0表示false，1表示true。
+       > 4. 建表时需要唯一标识字段，它的字段名为*id*。创建新表都要加上该字段定义，例如id INTEGERPRIMARY KEY AUTOINCREMENT NOT NULL。
+
+  2. 删除表格
+
+     - `DROP TABLE IF EXISTS table_name;`
+  
+     - ```sqlite
+       DROP TABLE IF EXISTS user_info;
+       ```
+  
+  3. 修改表结构
+  
+     - `ALTER TABLE　table_name　action;`
+  
+       > **只支持增加字段**，不支持删除/修改字段
+  
+     - ```sqlite
+       ALTER TABLE user_info ADD COLUMN phone VARCHAR;
+       ```
+  
+       > **每次只能增加一个字段**
+
+#### 2. 数据操纵语言
+
+- DML: Data Manipulation Language(数据操纵语言) — 怎样处理数据实体的内部记录
+
+- 操作
+
+  1. 添加记录
+
+     - `INSERT INTO　table_name (key1, key2, ...)　VALUES　(valu1, value2, ...);`
+
+     - ```sqlite
+       INSERT INTO user_info (name,age,height,weight,married,update_time)
+       VALUES ('张三',20,170,50,0,'20200504');
+       ```
+
+  2. 删除记录
+
+     - `DELETE FROM　table_name　WHERE　conditions;`
+
+     - ```sqlite
+       DELETE FROM user_info WHERE name='张三';
+       ```
+
+  3. 修改记录
+
+     - `UPDATE　table_name　SET　KEY=value WHERE conditions;`
+
+     - ```sqlite
+       UPDATE user_info SET married=1 WHERE name='张三';
+       ```
+
+  4. 查询记录
+
+     - `SELECT　KEYs　FROM　table_name　WHERE　conditions;` or `“ORDER BY　KEY　ASC或者DESC;`
+
+     - ```sqlite
+       // 查询
+       SELECT name FROM user_info WHERE name='张三';
+       
+       // 排序
+       SELECT * FROM user_info ORDER BY age ASC;
+       ```
+
+### 6.2.2 数据库管理器SQLiteDatabase
+
+- SQLiteDatabase是Android提供的SQLite数据库管理器；
+
+  ```java
+  // 创建名为test.db的数据库。数据库如果不存在就创建它，如果存在就打开它
+  SQLiteDatabase db = openOrCreateDatabase(getFilesDir() + "/test.db",
+  Context.MODE_PRIVATE, null);
+  String desc = String.format("数据库%s创建%s", db.getPath(), (db!=null)?"成功":"失
+  败");
+  tv_database.setText(desc);
+  // deleteDatabase(getFilesDir() + "/test.db"); // 删除名为test.db数据库
+  ```
+
+  - 首次运行测试App，调用openOrCreateDatabase方法会自动创建数据库，并返回该数据库的管理器实例(/chapter/files/database.db)
+
+- 数据表API，常用方法：
+
+  1. **管理类，用于数据库层面的操作**
+
+     > 1. openDatabase：打开指定路径的数据库。
+     > 2. isOpen：判断数据库是否已打开。
+     > 3. close：关闭数据库。
+     > 4. getVersion：获取数据库的版本号。
+     > 5. setVersion：设置数据库的版本号。
+
+  2. **事务类，用于事务层面的操作**
+
+     > 1. beginTransaction：开始事务。
+     > 2. setTransactionSuccessful：设置事务的成功标志。
+     > 3. endTransaction：结束事务。执行本方法时，系统会判断之前是否调用
+     > 4. setTransactionSuccessful方法，如果之前已调用该方法就提交事务，如果没有调用该方法就回滚事务。
+
+  3. **数据处理类，用于数据表层面的操作**
+
+     > 1. execSQL：执行拼接好的SQL控制语句。一般用于建表、删表、变更表结构。
+     > 2. delete：删除符合条件的记录。
+     > 3. update：更新符合条件的记录信息。
+     > 4. insert：插入一条记录。
+     > 5. query：执行查询操作，并返回结果集的游标。
+     > 6. rawQuery：执行拼接好的SQL查询语句，并返回结果集的游标。
+
+### 6.2.3 数据库帮助器SQLiteOpenHelper
+
+- Android提供了数据库帮助器SQLiteOpenHelper，帮助开发者合理使用SQLite；
+
+- 使用步骤：
+
+  1. 新建一个继承自SQLiteOpenHelper的数据库操作类，按提示重写onCreate和onUpgrade两个方法；
+
+     > - onCreate方法只在第一次打开数据库时执行，在此可以创建表结构
+     > - onUpgrade方法在数据库版本升高时执行，在此可以根据新旧版本号变更表结构
+
+  2. 为保证数据库安全使用，封装几个必要方法，包括获取单例对象、打开数据库连接、关闭数据库连接；
+
+     > - 获取单例对象：确保在App运行过程中数据库只会打开一次，避免重复打开引起错误
+     > - 打开数据库连接：SQLite有锁机制，即读锁和写锁的处理；故而数据库连接也分两种，读连接可调用getReadableDatabase方法获得，写连接可调用getWritableDatabase获得。
+     > - 关闭数据库连接：数据库操作完毕，调用数据库实例的close方法关闭连接。
+
+  3. 提供对表记录增加、删除、修改、查询的操作方法。
+
+- 能被SQLite直接使用的数据结构是ContentValues类；
+
+  > 它类似于映射Map，也提供了put和get方法存取键值对。区别之处在于：ContentValues的键只能是字符串，不能是其他类型。ContentValues主要用于增加记录和更新记录，对应数据库的insert和update方法
+
+- 查询操作: (Cursor对象)
+
+  1. **游标控制类方法，用于指定游标的状态**
+
+     > - close：关闭游标。
+     > - isClosed：判断游标是否关闭。
+     > - isFirst：判断游标是否在开头。
+     > - isLast：判断游标是否在末尾。
+     > 
+  
+  2. **游标移动类方法，把游标移动到指定位置**
+  
+     > - moveToFirst：移动游标到开头。
+     > - moveToLast：移动游标到末尾。
+     > - moveToNext：移动游标到下一条记录。
+     > - moveToPrevious：移动游标到上一条记录。
+     > - move：往后移动游标若干条记录。
+     > - moveToPosition：移动游标到指定位置的记录。
+  
+  3. **获取记录类方法，可获取记录的数量、类型以及取值**
+  
+     > - getCount：获取结果记录的数量。
+     > - getInt：获取指定字段的整型值。
+     > - getLong：获取指定字段的长整型值。
+     > - getFloat：获取指定字段的浮点数值。
+     > - getString：获取指定字段的字符串值。
+     > - getType：获取指定字段的字段类型。
+
+## 6.3 存储卡的文件操作
+
+### 6.3.1 私有存储空间与公共存储空间
+
+- 系统给每个App都分配了默认的私有存储空间：
+
+  - App在私有空间上读写文件无须任何授权；
+
+  - App在公共空间读写文件，要在AndroidManifest.xml里面添加下述的权限配置：
+
+    > ```xml
+    > <!-- 存储卡读写 -->
+    > <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    > <uses-permission android:name="android.permission.READ_EXTERNAL_STORAG" />
+    > ```
+
+- 公共空间存储路径获取: `Environment.getExternalStoragePublicDirectory`
+
+- 私有空间存储路径获取: `getExternalFilesDir`
+
+  > ```java
+  > // 获取系统的公共存储路径
+  > String publicPath =Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
+  > 
+  > // 获取当前App的私有存储路径
+  > String privatePath =getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString();
+  > ```
+
+### 6.3.2 在存储卡上读写文本文件
+
+- 文件IO流 `FileOutputStream` (写) 和 `FileInputStream` (读)
+
+  > ```java
+  > // 把字符串保存到指定路径的文本文件
+  > public static void saveText(String path, String txt) {
+  > 	// 根据指定的文件路径构建文件输出流对象
+  > 	try (FileOutputStream fos = new FileOutputStream(path)) {
+  > 		fos.write(txt.getBytes()); // 把字符串写入文件输出流
+  > 	} catch (Exception e) {
+  > 		e.printStackTrace();
+  > 	}
+  > }
+  > 
+  > // 从指定路径的文本文件中读取内容字符串
+  > public static String openText(String path) {
+  > 	String readStr = "";
+  > 	// 根据指定的文件路径构建文件输入流对象
+  > 	try (FileInputStream fis = new FileInputStream(path)) {
+  > 		byte[] b = new byte[fis.available()];
+  > 		fis.read(b); // 从文件输入流读取字节数组
+  > 		readStr = new String(b); // 把字节数组转换为字符串
+  > 	} catch (Exception e) {
+  > 		e.printStackTrace();
+  > 	}
+  > 	return readStr; // 返回文本文件中的文本字符串
+  > }
+  > ```
+
+### 6.3.3 在存储卡上读写图片文件
+
+- 需要专门的位图工具Bitmap处理
+
+- 依据来源分成3中获取方式，分别对应位图工厂BitmapFactory的3种方法:
+
+  1. decodeResource：从指定的资源文件中获取位图数据。例如下面代码表示从资源文件huawei.png获取位图对象：
+
+     > ```java
+     > Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.huawei);
+     > ```
+
+  2. decodeFile：从指定路径的文件中获取位图数据。 _注意从Android 10开始，该方法只适用于私有目录下的图片，不适用公共空间下的图片_ 
+
+  3. decodeStream：从指定的输入流中获取位图数据。比如使用IO流打开图片文件，此时文件输入流对象即可作为decodeStream方法的入参，相应的图片读取代码如下：
+
+     > ```java
+     > // 从指定路径的图片文件中读取位图数据
+     > public static Bitmap openImage(String path) {
+     > 	Bitmap bitmap = null; // 声明一个位图对象
+     > 	// 根据指定的文件路径构建文件输入流对象
+     > 	try (FileInputStream fis = new FileInputStream(path)) {
+     > 		bitmap = BitmapFactory.decodeStream(fis); // 从文件输入流中解码位图数据
+     > 	} catch (Exception e) {
+     > 		e.printStackTrace();
+     > 	}
+     > 	return bitmap; // 返回图片文件中的位图数据
+     > }
+     > ```
+
+- 图像视图ImageView显示方法：
+
+  1. `setImageResource`：设置图像视图的图片资源，该方法的入参为资源图片的编号，形如“R.drawable.去掉扩展名的图片名称”。
+  2. `setImageBitmap`：设置图像视图的位图对象，该方法的入参为Bitmap类型。
+  3. `setImageURI`：设置图像视图的路径对象，该方法的入参为Uri类型。字符串格式的文件路径可通过代码“Uri.parse(file_path)”转换成路径对象。
+
+- 图像数据写入图片文件 —> `compress`
+
+  - > ```java
+    > // 把位图数据保存到指定路径的图片文件
+    > public static void saveImage(String path, Bitmap bitmap) {
+    > 	// 根据指定的文件路径构建文件输出流对象
+    > 	try (FileOutputStream fos = new FileOutputStream(path)) {
+    > 		// 把位图数据压缩到文件输出流中
+    > 		bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos);
+    > 	} catch (Exception e) {
+    > 		e.printStackTrace();
+    > 	}
+    > }
+    > ```
+
+## 6.4 应用组件Application
+
+
+
+## 6.5 购物车(训练) 
 
