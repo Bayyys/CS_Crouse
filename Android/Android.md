@@ -1969,15 +1969,15 @@ public void onClick(View v) {
 
      - | 输入类型 | 说明 |
        | --- | --- |
-      |text |文本|
-      |textPassword |文本密码。显示时用圆点“·”代替|
-      |number |整型数|
-      |numberSigned |带符号的数字。允许在开头带负号“－”|
-      |numberDecimal |带小数点的数字|
-      |numberPassword |数字密码。显示时用圆点“·”代替|
-      |datetime |时间日期格式。除了数字外，还允许输入横线、斜杆、空格、冒号|
-      |date |日期格式。除了数字外，还允许输入横线“-”和斜杆“/”|
-      |time |时间格式。除了数字外，还允许输入冒号“:”|
+        |text |文本|
+        |textPassword |文本密码。显示时用圆点“·”代替|
+        |number |整型数|
+        |numberSigned |带符号的数字。允许在开头带负号“－”|
+        |numberDecimal |带小数点的数字|
+        |numberPassword |数字密码。显示时用圆点“·”代替|
+        |datetime |时间日期格式。除了数字外，还允许输入横线、斜杆、空格、冒号|
+        |date |日期格式。除了数字外，还允许输入横线“-”和斜杆“/”|
+        |time |时间格式。除了数字外，还允许输入冒号“:”|
 
   2. maxLength：指定文本允许输入的最大长度。
 
@@ -2071,11 +2071,197 @@ public void onClick(View v) {
 
 ### 5.3.3 文本变化监听
 
+#### 1. 关闭软键盘
 
+> /util/ViewUtil.java
+>
+> ```java
+> package com.example.chapter05.util;
+> 
+> import android.app.Activity;
+> import android.content.Context;
+> import android.view.View;
+> import android.view.inputmethod.InputMethodManager;
+> 
+> public class ViewUtil {
+>     public static void hideOneInputMethod(Activity act, View v) {
+>         // 从系统服务中获取输入法管理器
+>         InputMethodManager imm = (InputMethodManager)act.getSystemService(Context.INPUT_METHOD_SERVICE);
+>         // 关闭屏幕上的输入法软键盘
+>         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+>     }
+> }
+> ```
+
+#### 2. 判断输入文字达到指定位数
+
+> ```java
+>  protected void onCreate(Bundle savedInstanceState) {
+>         super.onCreate(savedInstanceState);
+>         setContentView(R.layout.activity_edit_keyboard);
+>         // 从布局文件中获取名为et_phone的手机号码编辑框
+>         EditText et_phone = findViewById(R.id.et_phone);
+>         // 从布局文件中获取名为et_password的密码编辑框
+>         EditText et_password = findViewById(R.id.et_password);
+>         // 给手机号码编辑框添加文本变化监听器
+>         et_phone.addTextChangedListener(new HideTextWatcher(et_phone, 11));
+>         // 给密码编辑框添加文本变化监听器
+>         et_password.addTextChangedListener(new HideTextWatcher(et_password, 6));
+>     }
+> 
+>     // 定义一个编辑框监听器，在输入文本达到指定长度时自动隐藏输入法
+>     private class HideTextWatcher implements TextWatcher {
+>         private EditText mView; // 声明一个编辑框对象
+>         private int mMaxLength; // 声明一个最大长度变量
+> 
+>         public HideTextWatcher(EditText v, int maxLength) {
+>             super();
+>             mView = v;
+>             mMaxLength = maxLength;
+>         }
+> 
+>         // 在编辑框的输入文本变化前触发
+>         public void beforeTextChanged(CharSequence s, int start, int count, int
+>                 after) {}
+> 
+>         // 在编辑框的输入文本变化时触发
+>         public void onTextChanged(CharSequence s, int start, int before, int count) {}
+> 
+>         // 在编辑框的输入文本变化后触发
+>         public void afterTextChanged(Editable s) {
+>             String str = s.toString(); // 获得已输入的文本字符串
+>             // 输入文本达到11位（如手机号码），或者达到6位（如登录密码）时关闭输入法
+>             if ((str.length() == 11 && mMaxLength == 11)
+>                     || (str.length() == 6 && mMaxLength == 6)) {
+>                 ViewUtil.hideOneInputMethod(EditKeyboardActivity.this, mView); // 隐藏输入法软键盘
+>             }
+>         }
+>     }
+> ```
 
 ## 5.4 对话框
 
+### 5.4.1 提醒对话框AlertDialog
 
+- 借助建造器AlertDialog.Builder
+  - 常用方法：
+    1. setIcon：设置对话框的标题图标。
+    2. setTitle：设置对话框的标题文本。
+    3. setMessage：设置对话框的内容文本。
+    4. setPositiveButton：设置肯定按钮的信息，包括按钮文本和点击监听器。
+    5. setNegativeButton：设置否定按钮的信息，包括按钮文本和点击监听器。
+    6. setNeutralButton：设置中性按钮的信息，包括按钮文本和点击监听器，该方法比较少用。
+    7. 设置参数后，还需调用建造器的create方法生成对话框示例 —> show() 显示
+
+```java
+	{...	
+		findViewById(R.id.btn_edit_alert).setOnClickListener(this);
+        tv_edit_judge = findViewById(R.id.tv_edit_judge);
+    }
+
+    @Override
+    public void onClick(View v) {
+        // 创建提醒对话框的建造器
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("尊敬的用户"); // 设置对话框的标题文本
+        builder.setMessage("你真的要卸载我吗？"); // 设置对话框的内容文本
+        // 设置对话框的肯定按钮文本及其点击监听器
+        builder.setPositiveButton("残忍卸载", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                tv_edit_judge.setText("虽然依依不舍，但是只能离开了");
+            }
+        });
+        // 设置对话框的否定按钮文本及其点击监听器, lambda表达式
+        builder.setNegativeButton("我再想想", (dialog, which) -> {
+            tv_edit_judge.setText("让我再陪你三百六十五个日夜")
+        });
+        AlertDialog alert = builder.create(); // 根据建造器构建提醒对话框对象
+        alert.show(); // 显示提醒对话框
+    }
+```
+
+### 5.4.2 日期对话框DatePickerDialog
+
+- DatePicker并非弹窗模式，而是在当前页面占据一块区域，并且不会自动关闭。—— 日期控件应该弹出对话框，选择完日期就要自动关闭对话框。因此，利用已经封装好的日期选择对话框DatePickerDialog！
+
+- 编码时只需调用构造方法设置当前的年、月、日，然后调用show方法即可弹出日期对话框。日期选择事件则由监听器OnDateSetListener负责响应，在该监听器的onDateSet方法中，开发者获取用户选择的具体日期，再做后续处理。
+
+- 特别注意onDateSet的月份参数，它的起始值不是1而是0。也就是说，一月份对应的参数值为0，十二月份对应的参数值为11，中间月份的数值以此类推。
+
+- `datePicker` :
+
+  - datePiclerMode : 
+
+    - spinner
+
+      ![image-20230223103245537](https://s2.loli.net/2023/02/23/hdP5WZsHqoTzBgb.png)
+
+    - spinner & calendarViewShown="false"
+
+      ![image-20230223103438094](https://s2.loli.net/2023/02/23/EglmyQfpN8SIBaL.png)
+
+    - calendar
+
+      ![image-20230223103330749](https://s2.loli.net/2023/02/23/qgnoFcC6E7dxj5u.png)
+
+- DatePickerDialog
+
+  - 日期选择监听器为DatePickerDialog.OnDateSetListener，对应实现的方法为onDateSet
+
+  - > ```java
+    > public void onClick(View v) {
+    > 	case R.id.btn_choose_date:
+    >         // 获取日历的一个实例，里面包含了当前的年月日
+    >         Calendar calendar = Calendar.getInstance();
+    >         // 构建一个日期对话框，该对话框已经集成了日期选择器。
+    >         // DatePickerDialog的第二个构造参数指定了日期监听器
+    >         DatePickerDialog dialog = new DatePickerDialog(this, this,
+    >                 calendar.get(Calendar.YEAR), // 年份
+    >                 calendar.get(Calendar.MONTH), // 月份
+    >                 calendar.get(Calendar.DAY_OF_MONTH)); // 日子
+    >         dialog.show(); // 显示日期对话框
+    >         break;
+    > }
+    > 
+    > @Override
+    > // 重写DatePickerDialog listener的onDateSet方法 (DatePickerDialog.OnDateSetListener接口)
+    >     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+    >         String desc = String.format("选择的日期为：%d年%d月%d日", year, month + 1, dayOfMonth);
+    >         tv_calender.setText(desc);
+    >     }
+    > ```
+
+### 5.4.3 时间对话框TimePickerDialog
+
+- 构造方法传的是当前的小时与分钟，最后一个参数表示是否采取24小时制，一般为true表示小时的数值范围为0～23；若为false则表示采取12小时制。
+
+- 时间选择监听器为OnTimeSetListener，对应需要实现onTimeSet方法
+
+  - TimePicker
+
+    - > 设置24小时制
+      >
+      > ```java
+      > tp_taker = findViewById(R.id.tp_taker);
+      > tp_taker.setIs24HourView(true);
+      > ```
+
+  - TimePickerDialog
+
+    - > ```java
+      > case R.id.btn_choose_time:
+      >                 // 获取日历的一个实例，里面包含了当前的时分秒
+      >                 Calendar calendar = Calendar.getInstance();
+      >                 // 构建一个时间对话框，该对话框已经集成了时间选择器。
+      >                 // TimePickerDialog的第二个构造参数指定了时间监听器
+      >                 TimePickerDialog dialog = new TimePickerDialog(this, this,
+      >                         calendar.get(Calendar.HOUR_OF_DAY), // 小时
+      >                         calendar.get(Calendar.MINUTE), // 分钟
+      >                         true); // true表示24小时制，false表示12小时制
+      >                 dialog.show(); // 显示时间对话框
+      >                 break;
+      > ```
 
 ## 5.5 找回密码(训练)
 

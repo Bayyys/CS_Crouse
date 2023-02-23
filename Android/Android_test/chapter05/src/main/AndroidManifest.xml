@@ -11,7 +11,7 @@
             android:name=".DrawableNineActivity"
             android:exported="false" />
         <activity
-            android:name=".EditFocusActivity"
+            android:name=".TimePickerActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
