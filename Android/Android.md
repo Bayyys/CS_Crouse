@@ -16,6 +16,8 @@
 
 `Ctrl+Alt+ButtonLeft`: 查看类的实现方法
 
+`Alt+Insert`: 根据类内字段插入构造类、toString()等
+
 # 1. 开发环境搭建
 
 ### 1.1 简介
@@ -2446,8 +2448,23 @@ public void onClick(View v) {
      > 3. endTransaction：结束事务。执行本方法时，系统会判断之前是否调用
      > 4. setTransactionSuccessful方法，如果之前已调用该方法就提交事务，如果没有调用该方法就回滚事务。
 
+     - ```java
+       try(
+       	mWDB.beginTransaction();
+       	mWDB.insert(TABLE_NAME,nullColumnHack:nu11,values);
+       	mWDB.insert(TABLE_NAME,nullColumnHack:nu11,values);
+       	mWDB.setTransactionSuccessful();
+       )catch(Exception e){
+       	e.printstackTrace();
+       )finally {
+       	mWDB.endTransaction();
+       }
+       ```
+  
+       
+  
   3. **数据处理类，用于数据表层面的操作**
-
+  
      > 1. execSQL：执行拼接好的SQL控制语句。一般用于建表、删表、变更表结构。
      > 2. delete：删除符合条件的记录。
      > 3. update：更新符合条件的记录信息。
@@ -2455,7 +2472,7 @@ public void onClick(View v) {
      > 5. query：执行查询操作，并返回结果集的游标。
      > 6. rawQuery：执行拼接好的SQL查询语句，并返回结果集的游标。
 
-### 6.2.3 数据库帮助器SQLiteOpenHelper
+### 6.2.3 [数据库帮助器SQLiteOpenHelper](https://editor.csdn.net/md/?articleId=129205322)
 
 - Android提供了数据库帮助器SQLiteOpenHelper，帮助开发者合理使用SQLite；
 
@@ -2487,24 +2504,26 @@ public void onClick(View v) {
      > - isFirst：判断游标是否在开头。
      > - isLast：判断游标是否在末尾。
      > 
-  
+
   2. **游标移动类方法，把游标移动到指定位置**
-  
+
      > - moveToFirst：移动游标到开头。
      > - moveToLast：移动游标到末尾。
      > - moveToNext：移动游标到下一条记录。
      > - moveToPrevious：移动游标到上一条记录。
      > - move：往后移动游标若干条记录。
      > - moveToPosition：移动游标到指定位置的记录。
-  
+
   3. **获取记录类方法，可获取记录的数量、类型以及取值**
-  
+
      > - getCount：获取结果记录的数量。
      > - getInt：获取指定字段的整型值。
      > - getLong：获取指定字段的长整型值。
      > - getFloat：获取指定字段的浮点数值。
      > - getString：获取指定字段的字符串值。
      > - getType：获取指定字段的字段类型。
+
+- [实例](https://editor.csdn.net/md/?articleId=129205322)
 
 ## 6.3 存储卡的文件操作
 
@@ -2520,6 +2539,12 @@ public void onClick(View v) {
     > <!-- 存储卡读写 -->
     > <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     > <uses-permission android:name="android.permission.READ_EXTERNAL_STORAG" />
+    > 
+    > <application
+    > 			'''<!-- ... -->'''
+    >             android:requestLegacyExternalStorage="true"
+    > 			'''<!-- ... -->'''
+    >              ></application>
     > ```
 
 - 公共空间存储路径获取: `Environment.getExternalStoragePublicDirectory`
@@ -2527,11 +2552,16 @@ public void onClick(View v) {
 - 私有空间存储路径获取: `getExternalFilesDir`
 
   > ```java
-  > // 获取系统的公共存储路径
+  > // 获取外部存储的公共空间路径
   > String publicPath =Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
   > 
-  > // 获取当前App的私有存储路径
+  > // 获取外部存储的私有存储路径
   > String privatePath =getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString();
+  > 
+  > // 获取App的私有存储空间
+  > String appPrivatePath = getFilesDir().toString();
+  > 
+  > path = P...Path + File.separatorChar +  fileName;
   > ```
 
 ### 6.3.2 在存储卡上读写文本文件
@@ -2581,16 +2611,40 @@ public void onClick(View v) {
   3. decodeStream：从指定的输入流中获取位图数据。比如使用IO流打开图片文件，此时文件输入流对象即可作为decodeStream方法的入参，相应的图片读取代码如下：
 
      > ```java
+     > case R.id.btn_read:
+     > 	// Method1
+     >     //Bitmap b2 = FileUtil.openImage(path);
+     >     //iv_content.setImageBitmap(b2);
+     > 	
+     > 	// Method2
+     >     //Bitmap b2 = BitmapFactory.decodeFile(path);
+     >     //iv_content.setImageBitmap(b2);
+     > 	
+     > 	// Metho
+     >     // 直接调用setImageURI方法，设置图像视图的路径对象
+     >     iv_content.setImageURI(Uri.parse(path));
+     >     break;
+     > 
      > // 从指定路径的图片文件中读取位图数据
      > public static Bitmap openImage(String path) {
-     > 	Bitmap bitmap = null; // 声明一个位图对象
-     > 	// 根据指定的文件路径构建文件输入流对象
-     > 	try (FileInputStream fis = new FileInputStream(path)) {
-     > 		bitmap = BitmapFactory.decodeStream(fis); // 从文件输入流中解码位图数据
-     > 	} catch (Exception e) {
-     > 		e.printStackTrace();
-     > 	}
-     > 	return bitmap; // 返回图片文件中的位图数据
+     >     Bitmap bitmap = null; // 声明一个位图对象
+     >     FileInputStream fis = null;
+     >     try {
+     >         // 根据指定的文件路径构建文件输入流对象
+     >         fis = new FileInputStream(path);
+     >         bitmap = BitmapFactory.decodeStream(fis);// 从文件输入流中解码位图数据
+     >     } catch (Exception e) {
+     >         e.printStackTrace();
+     >     } finally {
+     >         if (fis != null) {
+     >             try {
+     >                 fis.close();
+     >             } catch (Exception e) {
+     >                 e.printStackTrace();
+     >             }
+     >         }
+     >     }
+     >     return bitmap;
      > }
      > ```
 
@@ -2605,14 +2659,24 @@ public void onClick(View v) {
   - > ```java
     > // 把位图数据保存到指定路径的图片文件
     > public static void saveImage(String path, Bitmap bitmap) {
-    > 	// 根据指定的文件路径构建文件输出流对象
-    > 	try (FileOutputStream fos = new FileOutputStream(path)) {
-    > 		// 把位图数据压缩到文件输出流中
-    > 		bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos);
-    > 	} catch (Exception e) {
-    > 		e.printStackTrace();
-    > 	}
-    > }
+    >         FileOutputStream fos = null;
+    >         try {
+    >             // 根据指定的文件路径构建文件输出流对象
+    >             fos = new FileOutputStream(path);
+    >             // 将图片压缩为PNG格式输出
+    >             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+    >         } catch (FileNotFoundException e) {
+    >             e.printStackTrace();
+    >         } finally {
+    >             if (fos != null) {
+    >                 try {
+    >                     fos.close();
+    >                 } catch (Exception e) {
+    >                     e.printStackTrace();
+    >                 }
+    >             }
+    >         }
+    >     }
     > ```
 
 ## 6.4 应用组件Application

@@ -1,4 +1,4 @@
-package com.example.chapter05.util;
+package com.example.chapter06.util;
 
 import android.app.Activity;
 import android.content.Context;
