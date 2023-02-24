@@ -1,15 +1,8 @@
 package com.example.chapter05;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,6 +14,11 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.chapter05.util.ViewUtil;
 
@@ -37,8 +35,9 @@ public class LoginMainActivity extends AppCompatActivity implements RadioGroup.O
     private RadioButton rb_verifyCode;
     private ActivityResultLauncher<Intent> register;
     private Button btn_login;
+    private SharedPreferences preferences;
     // 定义输入密码
-    String mPassword = "111111";
+    String mPassword = "";
     private String mVerifyCode;
 
     @Override
@@ -60,15 +59,20 @@ public class LoginMainActivity extends AppCompatActivity implements RadioGroup.O
         RadioGroup rb_login = findViewById(R.id.rg_login);
         rb_password = findViewById(R.id.rb_password);
         rb_verifyCode = findViewById(R.id.rb_verifycode);
+        preferences = getSharedPreferences("login", MODE_PRIVATE);
         // Register
         register = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             Intent intent = result.getData();
             if (intent != null && result.getResultCode() == Activity.RESULT_OK) {
                 mPassword = intent.getStringExtra("new_password");
+                et_password.setText(mPassword);
             }
         });
+        // SharedPreferences
 
         // 2. Limitation
+        // reload()
+        reload();
         // RadioGroup
         rb_login.setOnCheckedChangeListener(this);
         // et_phone设置文本监听器
@@ -81,16 +85,44 @@ public class LoginMainActivity extends AppCompatActivity implements RadioGroup.O
         btn_login.setOnClickListener(this);
     }
 
+    private void reload() {
+        boolean isRemember = preferences.getBoolean("isRemember", false);
+        if (isRemember) {
+            String phone = preferences.getString("phone", "");
+            String password = preferences.getString("password", "");
+            et_phone.setText(phone);
+            et_password.setText(password);
+            ck_remember.setChecked(true);
+            mPassword = password;
+        } else {
+            et_phone.setText("");
+            et_password.setText("");
+            ck_remember.setChecked(false);
+        }
+    }
+
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
         switch (checkedId) {
             // Password Login
             case R.id.rb_password:
+                // 判断是否记住过密码
+                String phoneEdit = et_phone.getText().toString();
+                if (phoneEdit.length() == 11) {
+                    String phoneRemember = preferences.getString("phone", "");
+                    if (phoneRemember.equals(phoneEdit)) {
+                        String passwordRemember = preferences.getString("password", "");
+                        et_password.setText(passwordRemember);
+                        ck_remember.setChecked(true);
+                    }
+                } else {
+                    et_password.setText(null);
+                }
                 tv_password.setText(getString(R.string.login_password));
                 et_password.setHint(getString(R.string.input_password));
-                et_password.setText(null);
                 btn_forget.setText(getString(R.string.forget_password));
                 ck_remember.setVisibility(View.VISIBLE);
+                ck_remember.setChecked(false);
                 break;
 
             // Verify Code Login
@@ -165,6 +197,14 @@ public class LoginMainActivity extends AppCompatActivity implements RadioGroup.O
                         return;
                     } else {
                         // 密码正确，提示登录成功
+                        if (ck_remember.isChecked()) {
+                            // 保存登录信息
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putString("phone", phoneNum);
+                            editor.putString("password", et_password.getText().toString());
+                            editor.putBoolean("isRemember", true);
+                            editor.apply();
+                        }
                         loginSuccess();
                     }
                 } else if (rb_verifyCode.isChecked()) {
@@ -213,6 +253,28 @@ public class LoginMainActivity extends AppCompatActivity implements RadioGroup.O
             if (s.toString().length() == mMaxLength) {
                 // 隐藏输入法软键盘
                 ViewUtil.hideOneInputMethod(LoginMainActivity.this, mView);
+                if (mView == et_phone) {
+                    if (rb_password.isChecked()) {
+                        // 如果是密码登录方式，判断是否保存了密码
+                        String phoneEnter = et_phone.getText().toString();
+                        String phoneSave = preferences.getString("phone", "");
+                        if (phoneEnter.equals(phoneSave)) {
+                            // 如果输入的手机号码和保存的手机号码一致，自动填充密码
+                            mPassword = preferences.getString("password", "");
+                            et_password.setText(mPassword);
+                        } else {
+                            // 如果输入的手机号码和保存的手机号码不一致，清空密码
+                            mPassword = "";
+                            et_password.setText(null);
+                        }
+                        // 如果是手机号码输入框，自动跳转到密码输入框
+                        et_password.requestFocus();
+                    } else if (rb_verifyCode.isChecked()) {
+                        // 如果是验证码登录方式，自动跳转到验证码输入框
+                        btn_forget.requestFocus();
+                    }
+                }
+
             }
         }
     }
