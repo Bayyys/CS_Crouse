@@ -8,7 +8,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Test">
         <activity
-            android:name=".LoginMainActivity"
+            android:name=".LoginMainSQliteActivity"
             android:exported="false" />
         <activity
             android:name=".LoginForgetActivity"
@@ -17,7 +17,7 @@
             android:name=".DrawableNineActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginMainSQLiteActivity"
+            android:name=".LoginMainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

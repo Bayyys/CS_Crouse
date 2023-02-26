@@ -41,27 +41,25 @@
 
 - 硬件基本要求
 
-（1）内存要求至少8GB，越大越好。
-
-（2）CPU要求1.5GHz以上，越快越好。
-
-（3）硬盘要求系统盘剩余空间10GB以上，越大越好。
-
-（4）要求带无线网卡与USB插槽。
+> （1）内存要求至少8GB，越大越好。
+>
+> （2）CPU要求1.5GHz以上，越快越好。
+>
+> （3）硬盘要求系统盘剩余空间10GB以上，越大越好。
+>
+> （4）要求带无线网卡与USB插槽。
 
 - 下面是对操作系统的基本要求（以Windows为例）。
 
-
-（1）必须是64位系统，不能是32位系统。
-
-（2）Windows系统至少为Windows 7，推荐Windows 10，不支持Windows XP。
+> （1）必须是64位系统，不能是32位系统。
+>
+> （2）Windows系统至少为Windows 7，推荐Windows 10，不支持Windows XP。
 
 - 下面是对网络的基本要求：
 
-
-（1）最好连接公众网，因为校园网可能无法访问国外的网站。
-
-（2）下载速度至少每秒1MB，越快越好。因为Android Studio安装包大小为1GB左右，还需要另外下载几百MB的SDK，所以网络带宽一定要够大，否则下载文件都要等很久。
+> （1）最好连接公众网，因为校园网可能无法访问国外的网站。
+>
+> （2）下载速度至少每秒1MB，越快越好。因为Android Studio安装包大小为1GB左右，还需要另外下载几百MB的SDK，所以网络带宽一定要够大，否则下载文件都要等很久。
 
 ### 1.2.2 Android Studio安装
 
@@ -73,12 +71,11 @@
 
 #### 1.2.3.1 Android SDK Location目录说明
 
-- build-tools目录，存放各版本Android的编译工具。
-- emulator目录，存放模拟器的管理工具。
-- platforms目录，存放各版本Android的资源文件与内核JAR包android.jar。
-- platform-tools目录，存放常用的开发辅助工具，包括客户端驱动程序adb.exe、数据库管理工具
-- sqlite3.exe，等等。
-- sources目录，存放各版本Android的SDK源码。
+- **build-tools**目录，存放各版本Android的编译工具。
+- **emulator**目录，存放模拟器的管理工具。
+- **platforms**目录，存放各版本Android的资源文件与内核JAR包android.jar。
+- **platform-tools**目录，存放常用的开发辅助工具，包括客户端驱动程序adb.exe、数据库管理工具sqlite3.exe，等等。
+- **sources**目录，存放各版本Android的SDK源码。
 
 ### 1.2.4 App运行日志
 
@@ -114,13 +111,13 @@ public class MainActivity extends AppCompatActivity {
 
 - 两个分类：app(代表app模块)、Gradle Scripts
 - app 子目录
-  - manifests子目录，下面只有一个XML文件，即AndroidManifest.xml，它是App的运行配置文件。
-  - java子目录，下面有3个com.example.myapp包，其中第一个包存放当前模块的Java源代码，后面两个包存放测试用的Java代码。
-  - res子目录，存放当前模块的资源文件。res下面又有4个子目录：
-    - drawable目录存放图形描述文件与图片文件。
-    - layout目录存放App页面的布局文件。
+  - manifests子目录，下面只有一个XML文件，即**AndroidManifest.xml**，它是App的运行配置文件。
+  - **java**子目录，下面有3个com.example.myapp包，其中第一个包存放当前模块的Java源代码，后面两个包存放测试用的Java代码。
+  - **res**子目录，存放当前模块的资源文件。res下面又有4个子目录：
+    - **drawable**目录存放图形描述文件与图片文件。
+    - **layout**目录存放App页面的布局文件。
     - mipmap目录存放App的启动图标。
-    - values目录存放一些常量定义文件，例如字符串常量strings.xml、像素常量dimens.xml、颜色常量colors.xml、样式风格定义styles.xml等。
+    - **values**目录存放一些常量定义文件，例如字符串常量strings.xml、像素常量dimens.xml、颜色常量colors.xml、样式风格定义styles.xml等。
 - Gradle Scripts 为工程的编译配置文件：
   - build.gradle，该文件分为项目级与模块级两种，用于描述App工程的编译规则。
   - proguard-rules.pro，该文件用于描述Java代码的混淆规则。
