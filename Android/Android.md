@@ -2325,7 +2325,7 @@ public void onClick(View v) {
 
 - DDL: Data Definition Language(数据定义语言) — 怎样变更数据实体的框架结构
 
-- 操作(增删改查)
+- 操作
 
   1. 创建表格
 
@@ -2373,7 +2373,7 @@ public void onClick(View v) {
 
 - DML: Data Manipulation Language(数据操纵语言) — 怎样处理数据实体的内部记录
 
-- 操作
+- 操作(增删改查)
 
   1. 添加记录
 
@@ -2678,7 +2678,221 @@ public void onClick(View v) {
 
 ## 6.4 应用组件Application
 
+### 6.4.1 Application的生命周期
 
+- Application是Android的一大组件，在App运行过程中有且仅有一个Application对象贯穿应用的整个生命周期；
+
+- `AndroidManifest.xml`中，activity节点的上级正是application节点，不过该节点并未指定name属性，此时App采用默认的Application实例。
+
+  - `AndroidManifest.xml`
+
+    > ```xml
+    > <application
+    > android:name=".MainApplication"
+    > android:icon="@mipmap/ic_launcher"
+    > android:label="@string/app_name"
+    > android:theme="@style/AppTheme">
+    > ```
+
+  - `MainApplication.java`
+
+    > 1. onCreate：在App启动时调用。
+    > 2. onTerminate：在App终止时调用（按字面意思）[实际应用并不会回调，仅在系统开发时测试中会调用]
+    >    - This method is for use in emulated process environments．It will never be called on a production Android device, where processes are removed by simply killing them; no user code (including this callback) is executed when doing so
+    > 3. onConfigurationChanged：在配置改变时调用，例如从竖屏变为横屏。
+
+- Applicataion create -> Activity create -> Other operation
+
+### 6.4.2 利用Application操作全局变量
+
+- Application的生命周期覆盖了App运行的全过程。不像短暂的Activity生命周期，一旦退出该页面，Activity实例就被销毁。因此，利用Application的全生命特性，能够在Application实例中保存全局变量。
+
+  - > 1. 会频繁读取的信息，例如用户名、手机号码等。
+    > 2. 不方便由意图传递的数据，例如位图对象、非字符串类型的集合对象等。
+    > 3. 容易因频繁分配内存而导致内存泄漏的对象，例如Handler处理器实例等。
+
+- 操作：
+
+  1. 编写一个继承自Application的新类MainApplication。该类采用单例模式，内部先声明自身类的一个静态成员对象，在创建App时把自身赋值给这个静态对象，然后提供该对象的获取方法getInstance；
+
+     - > ```java
+       > public class MainApplication extends Application {
+       >     private final static String TAG = "MainApplication";
+       >     private static MainApplication mApp; // 声明一个当前应用的静态实例
+       >     // 声明一个公共的信息映射对象，可当作全局变量使用
+       >     public HashMap<String, String> infoMap = new HashMap<String, String>();
+       >     // 利用单例模式获取当前应用的唯一实例
+       >     public static MainApplication getInstance() {
+       >     	return mApp;
+       >     }
+       >     @Override
+       >     public void onCreate() {
+       >         super.onCreate();
+       >         Log.d(TAG, "onCreate");
+       >         mApp = this; // 在打开应用时对静态的应用实例赋值
+       >     }
+       > }
+       > ```
+       >
+       > 
+
+  2. 在活动页面代码中调用MainApplication的getInstance方法，获得它的一个静态对象，再通过该对象访问MainApplication的公共变量和公共方法；
+
+  3. 在AndroidManifest.xml中注册新定义的Application类名，也就是给application节点增加android:name属性，其值为.MainApplication
+
+### 6.4.3 利用Room简化数据库操作
+
+- SQLite 操作繁琐！
+
+- 由于Room(Google开发书数据库框架)并未集成到SDK中，而是作为第三方框架提供，因此要修改模块的build.gradle文件，往dependencies节点添加下面两行配置，表示导入指定版本的Room库：
+
+  - > ```xml
+    > implementation 'androidx.room:room-runtime:2.2.5'
+    > annotationProcessor 'androidx.room:room-compiler:2.2.5'
+    > ```
+
+- 操作:
+
+  1. **编写图书信息表对应的实体类**
+
+     > enity - BookInfo
+     >
+     > ```java
+     > package com.example.chapter06.enity;
+     > 
+     > import androidx.annotation.NonNull;
+     > import androidx.room.Entity;
+     > import androidx.room.PrimaryKey;
+     > 
+     > @Entity
+     > public class BookInfo {
+     >     @PrimaryKey(autoGenerate = true)
+     >     @NonNull
+     >     private int id;
+     > 
+     >     private String name;    // 书名
+     >     private String author;  // 作者
+     >     private String press;   // 出版社
+     >     private String price;   // 价格
+     > 
+     >     public int getId() {
+     >         return id;
+     >     }
+     > 
+     >     public void setId(int id) {
+     >         this.id = id;
+     >     }
+     > 
+     >     public String getName() {
+     >         return name;
+     >     }
+     > 
+     >     public void setName(String name) {
+     >         this.name = name;
+     >     }
+     > 
+     >     public String getAuthor() {
+     >         return author;
+     >     }
+     > 
+     >     public void setAuthor(String author) {
+     >         this.author = author;
+     >     }
+     > 
+     >     public String getPress() {
+     >         return press;
+     >     }
+     > 
+     >     public void setPress(String press) {
+     >         this.press = press;
+     >     }
+     > 
+     >     public String getPrice() {
+     >         return price;
+     >     }
+     > 
+     >     public void setPrice(String price) {
+     >         this.price = price;
+     >     }
+     > 
+     >     @Override
+     >     public String toString() {
+     >         return "BookInfo{" +
+     >                 "id=" + id +
+     >                 ", name='" + name + '\'' +
+     >                 ", author='" + author + '\'' +
+     >                 ", press='" + press + '\'' +
+     >                 ", price='" + price + '\'' +
+     >                 '}';
+     >     }
+     > }
+     > ```
+
+  2. **编写图书信息表对应的持久化类**
+
+     > dao - BookDao
+     >
+     > ```java
+     > package com.example.chapter06.dao;
+     > 
+     > import androidx.room.Dao;
+     > import androidx.room.Delete;
+     > import androidx.room.Insert;
+     > import androidx.room.Query;
+     > import androidx.room.Update;
+     > 
+     > import com.example.chapter06.enity.BookInfo;
+     > 
+     > import java.util.List;
+     > 
+     > @Dao
+     > public interface BookDao {
+     >     @Insert
+     >     void insert(BookInfo... book);
+     > 
+     >     @Delete
+     >     void delete(BookInfo... book);
+     > 
+     >     @Query("DELETE FROM BookInfo")
+     >     void deleteAll();
+     > 
+     >     @Update
+     >     int update(BookInfo... book);
+     > 
+     >     @Query("SELECT * FROM BookInfo")
+     >     List<BookInfo> queryAll();
+     > 
+     >     @Query("SELECT * FROM BookInfo WHERE name=:name ORDER BY id DESC limit 1")
+     >     BookInfo queryByName(String name);
+     > 
+     > }
+     > ```
+
+  3. **编写图书信息表对应的数据库类**
+
+     > database - BookDatabase
+     >
+     > ```java
+     > package com.example.chapter06.database;
+     > 
+     > import androidx.room.Database;
+     > import androidx.room.RoomDatabase;
+     > 
+     > import com.example.chapter06.dao.BookDao;
+     > import com.example.chapter06.enity.BookInfo;
+     > 
+     > // 该注解用于标识一个数据库类，entities属性用于指定数据库中的表，version属性用于指定数据库版本
+     > // exportSchema属性用于指定是否导出数据库信息的json文件，true表示导出，false表示不导出
+     > // 设置为true时，还需指定json文件的存放路径(在build.gradle中设置, android-defaultConfig-javaCompileOptions中设置)
+     > @Database(entities = {BookInfo.class}, version = 1, exportSchema = true)
+     > public abstract class BookDatabase extends RoomDatabase {
+     >     public abstract BookDao bookDao();
+     > }
+     > ```
+
+  4. **在自定义的Application类中声明图书数据库的唯一实例**
+
+  5. 
 
 ## 6.5 购物车(训练) 
 

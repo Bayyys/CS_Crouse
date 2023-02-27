@@ -2,6 +2,7 @@ package com.example.chapter06.util;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -12,47 +13,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 
 public class FileUtil {
-//    public static void saveFile(String path, String txt) {
-//        BufferedWriter os = null;
-//        try {
-//            os = new BufferedWriter(new FileWriter(path));
-//            os.write(txt);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (os != null) {
-//                try {
-//                    os.close();
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    }
-//
-//    public static StringBuilder readFile(String path) {
-//        BufferedReader is = null;
-//        StringBuilder sb = new StringBuilder();
-//        try {
-//            is = new BufferedReader(new FileReader(path));
-//            String line = null;
-//            while ((line = is.readLine()) != null) {
-//                sb.append(line);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (is != null) {
-//                try {
-//                    is.close();
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//        return sb;
-//    }
-
     public static void saveText(String path, String txt) {
         BufferedWriter os = null;
         try {
@@ -99,7 +59,8 @@ public class FileUtil {
         try {
             fos = new FileOutputStream(path);
             // 将图片压缩为PNG格式输出
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            Log.d("bay", path + "图片保存成功");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } finally {
