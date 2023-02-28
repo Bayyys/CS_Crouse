@@ -2892,7 +2892,713 @@ public void onClick(View v) {
 
   4. **在自定义的Application类中声明图书数据库的唯一实例**
 
-  5. 
+     > ```java
+     > public class MainApplication extends Application {
+     >     private final static String TAG = "MainApplication";
+     >     private static MainApplication mApp; // 声明一个当前应用的静态实例
+     >     // 声明一个公共的信息映射对象，可当作全局变量使用
+     >     public HashMap<String, String> infoMap = new HashMap<String, String>();
+     >     private BookDatabase bookDatabase; // 声明一个书籍数据库对象
+     >     // 利用单例模式获取当前应用的唯一实例
+     >     public static MainApplication getInstance() {
+     >         return mApp;
+     >     }
+     >     @Override
+     >     public void onCreate() {
+     >         super.onCreate();
+     >         Log.d(TAG, "onCreate");
+     >         mApp = this; // 在打开应用时对静态的应用实例赋值
+     > // 构建书籍数据库的实例
+     >         bookDatabase = Room.databaseBuilder(mApp, BookDatabase.class,"BookInfo")
+     >                 .addMigrations() // 允许迁移数据库（发生数据库变更时，Room默认删除原数据
+     >         库再创建新数据库。如此一来原来的记录会丢失，故而要改为迁移方式以便保存原有记录）
+     > .allowMainThreadQueries() // 允许在主线程中操作数据库（Room默认不能在主
+     >         线程中操作数据库）
+     > .build();
+     >     }
+     >     // 获取书籍数据库的实例
+     >     public BookDatabase getBookDB(){
+     >         return bookDatabase;
+     >     }
+     > }
+     > ```
+  
+  5. 在操作图书信息表的地方获取数据表的持久化对象
+  
+     > ```java
+     > // 从App实例中获取唯一的图书持久化对象
+     > BookDao bookDao = MainApplication.getInstance().getBookDB().bookDao();
+     > ```
+     >
 
 ## 6.5 购物车(训练) 
+
+# 7. 内容共享
+
+## 7.1 在应用之间共享数据
+
+### 7.1.1 通过ContentProvider封装数据
+
+- 内容提供器`ContentProvider`涵盖与内部数据存取有关的一系列组件，完整的内容组件由内容提供器`ContentProvider`、内容解析器`ContentResolver`、内容观察器`ContentObserver`三部分组成。
+
+- 对比SQLite：
+
+  > 1. ContentProvider给App存取内部数据提供了统一的外部接口，让不同的应用之间得以互相共享数据。
+  > 2. SQLite可操作应用自身的内部数据库；上传和下载功能可操作后端服务器的文件；而ContentProvider可操作当前设备其他应用的内部数据，它是一种中间层次的数据存储形式。
+
+- 创建过程：
+
+  1. **编写用户信息表的数据库帮助器**
+
+     - /Database/UserDBHelper.java
+     - /Enity/User.java
+
+  2. **编写内容提供器的基础字段类**
+
+  3. **通过右键菜单创建内容提供器**
+
+     > 1. 右击App模块的包名目录，在弹出的右键菜单中依次选择New→Other→Content Provider，打开组件创建对话框; 
+     >
+     >    - ![image-20230228100924456](https://s2.loli.net/2023/02/28/xyOABqXKtWZIEMh.png)
+     >    - URI Authorities 通过AndroiManifest.xml修改；
+     >
+     > 2. ```xml
+     >    <!-- provider的authorities属性值需要与Java代码的AUTHORITIES保持一致 -->
+     >    <provider
+     >    android:name=".provider.UserInfoProvider"
+     >    android:authorities="com.example.chapter07_server.provider.UserInfoProvider"
+     >    android:enabled="true"
+     >    android:exported="true" />
+     >    ```
+     >
+     > 3. ```java
+     >    package com.example.chapter07_server.provider;
+     >    
+     >    import android.content.ContentProvider;
+     >    import android.content.ContentValues;
+     >    import android.content.UriMatcher;
+     >    import android.database.Cursor;
+     >    import android.database.sqlite.SQLiteDatabase;
+     >    import android.net.Uri;
+     >    import android.util.Log;
+     >    
+     >    import com.example.chapter07_server.UserInfoContent;
+     >    import com.example.chapter07_server.database.UserDBHelper;
+     >    
+     >    public class UserInfoProvider extends ContentProvider {
+     >    
+     >        private UserDBHelper dbHelper;
+     >        private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
+     >    
+     >        private static final int USERS = 1;
+     >        private static final int USER = 2;
+     >    
+     >        static {
+     >            // 往Uri匹配器中添加指定的数据路径
+     >            URI_MATCHER.addURI(UserInfoContent.AUTHORITIES, "user", USERS);
+     >            URI_MATCHER.addURI(UserInfoContent.AUTHORITIES, "user/#", USER);
+     >        }
+     >    
+     >        @Override
+     >        public boolean onCreate() {
+     >            Log.d("bay", "UserInfoProvider onCreate");
+     >            dbHelper = UserDBHelper.getInstance(getContext());
+     >            return true;
+     >        }
+     >    
+     >        // content://com.example.chapter07_server.provider.UserInfoProvider/user
+     >        @Override
+     >        public Uri insert(Uri uri, ContentValues values) {
+     >            if (URI_MATCHER.match(uri) != USERS) {
+     >                throw new IllegalArgumentException("Unknown URI " + uri);
+     >            }
+     >            Log.d("bay", "UserInfoProvider insert");
+     >            SQLiteDatabase db = dbHelper.getWritableDatabase();
+     >            db.insert(UserDBHelper.TABLE_NAME, null, values);
+     >            return uri;
+     >        }
+     >    
+     >        @Override
+     >        public int delete(Uri uri, String selection, String[] selectionArgs) {
+     >            int count = 0;
+     >            SQLiteDatabase db = dbHelper.getWritableDatabase();
+     >            switch (URI_MATCHER.match(uri)) {
+     >                // content://com.example.chapter07_server.provider.UserInfoProvider/user
+     >                // 删除多行
+     >                case USERS:
+     >                    count = db.delete(UserDBHelper.TABLE_NAME, selection, selectionArgs);
+     >                    break;
+     >    
+     >                // content://com.example.chapter07_server.provider.UserInfoProvider/user/1
+     >                // 删除单行
+     >                case USER:
+     >                    String id = uri.getLastPathSegment();
+     >                    count = db.delete(UserDBHelper.TABLE_NAME, "_id=?", new String[]{id});
+     >                    break;
+     >            }
+     >            db.close();
+     >            return count;
+     >        }
+     >    
+     >        @Override
+     >        public int update(Uri uri, ContentValues values, String selection,
+     >                          String[] selectionArgs) {
+     >    
+     >            throw new UnsupportedOperationException("Not yet implemented");
+     >        }
+     >    
+     >        @Override
+     >        public String getType(Uri uri) {
+     >            // TODO: Implement this to handle requests for the MIME type of the data
+     >            // at the given URI.
+     >            throw new UnsupportedOperationException("Not yet implemented");
+     >        }
+     >    
+     >        @Override
+     >        public Cursor query(Uri uri, String[] projection, String selection,
+     >                            String[] selectionArgs, String sortOrder) {
+     >            Log.d("bay", "UserInfoProvider query");
+     >            SQLiteDatabase db = dbHelper.getReadableDatabase();
+     >            Cursor cursor = db.query(UserDBHelper.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+     >            return cursor;
+     >        }
+     >    }
+     >    ```
+     >
+     >    - Uri(通用资源标识符Universal Resource ldentifer)
+     >      - 代表数据操作的地址，每一个ConentProvider都会有唯一的地址。ContentProvider使用的Uri语法结构如下：
+     >    - content://authority/data_path/id
+     >      - [content://]是通用前级，表示该Uri用于ContentProvider定位资源。
+     >      - [authority]是授权者名称，用来确定具体由哪一个ContentProvider提供资源。因此一般authority都由类的小写全称组成，以保证唯一性。
+     >      - [data_path]是数据路径，用来确定请求的是哪个数据集。
+     >      - [id]是数据编号，用来请求单条数据。如果是多条这个字段忽略。
+
+### 7.1.2 通过ContentResolver访问数据
+
+- ContentResolver提供的方法与ContentProvider一一对应，比如insert、delete、query、update、getType等，甚至连方法的参数类型都雷同。
+
+- AndroidManifest.xml
+
+  - ```xml
+    <!--出于安全考虑，Android 11 要求应用事先说明需要访问的其他软件包-->
+    <queries>
+        <package android:name="com.example.chapter07_server"/>
+    </queries>
+
+- 增删改查
+
+  - 参数说明
+
+    1. uri：Uri类型，指定本次操作的数据表路径。
+    2. projection：字符串数组类型，指定将要查询的字段名称列表。
+    3. selection：字符串类型，指定查询条件。
+    4. selectionArgs：字符串数组类型，指定查询条件中的参数取值列表。
+    5. sortOrder：字符串类型，指定排序条件
+
+  - ```java
+    // 添加一条用户记录
+    private void addUser(UserInfo user) {
+    ContentValues name = new ContentValues();
+    name.put("name", user.name);
+    name.put("age", user.age);
+    name.put("height", user.height);
+    name.put("weight", user.weight);
+    name.put("married", 0);
+    name.put("update_time", DateUtil.getNowDateTime(""));
+    // 通过内容解析器往指定Uri添加用户信息
+    getContentResolver().insert(UserInfoContent.CONTENT_URI, name);
+    }
+    
+    // 删除操作
+    getContentResolver().delete(UserInfoContent.CONTENT_URI, "1=1", null);
+    
+    // 查询操作
+    // 显示所有的用户记录
+    private void showAllUser() {
+        List<UserInfo> userList = new ArrayList<UserInfo>();
+        // 通过内容解析器从指定Uri中获取用户记录的游标
+        Cursor cursor = getContentResolver().query(UserInfoContent.CONTENT_URI,
+                                                   null, null, null, null);
+        // 循环取出游标指向的每条用户记录
+        while (cursor.moveToNext()) {
+            UserInfo user = new UserInfo();
+            user.name =
+                cursor.getString(cursor.getColumnIndex(UserInfoContent.USER_NAME));
+            user.age =
+                cursor.getInt(cursor.getColumnIndex(UserInfoContent.USER_AGE));
+            user.height =
+                cursor.getInt(cursor.getColumnIndex(UserInfoContent.USER_HEIGHT));
+            user.weight =
+                cursor.getFloat(cursor.getColumnIndex(UserInfoContent.USER_WEIGHT));
+            userList.add(user); // 添加到用户信息列表
+        }
+        cursor.close(); // 关闭数据库游标
+        String contactCount = String.format("当前共找到%d个用户", userList.size());
+        tv_desc.setText(contactCount);
+        ll_list.removeAllViews(); // 移除线性布局下面的所有下级视图
+        for (UserInfo user : userList) { // 遍历用户信息列表
+            String contactDesc = String.format("姓名为%s，年龄为%d，身高为%d，体重为%f\n",
+                                               user.name, user.age, user.height,
+                                               user.weight);
+            TextView tv_contact = new TextView(this); // 创建一个文本视图
+            tv_contact.setText(contactDesc);
+            tv_contact.setTextColor(Color.BLACK);
+            tv_contact.setTextSize(17);
+            int pad = Utils.dip2px(this, 5);
+            tv_contact.setPadding(pad, pad, pad, pad); // 设置文本视图的内部间距
+            ll_list.addView(tv_contact); // 把文本视图添加至线性布局
+        }
+    }
+    ```
+
+## 7.2 使用内容组件获取通讯信息
+
+### 7.2.1 运行时动态申请权限
+
+- `AcdroidManifest.xml`
+
+  ```xml
+  <!-- 联系人/通讯录.包括读联系人、写联系人 -->
+  <uses-permission android:name="android.permission.READ_CONTACTS" />
+  <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+  <!-- 短信.包括发送短信、接收短信、读短信-->
+  <uses-permission android:name="android.permission.SEND_SMS" />
+  <uses-permission android:name="android.permission.RECEIVE_SMS" />
+  <uses-permission android:name="android.permission.READ_SMS" />
+  <!-- 通话记录.包括读通话记录、写通话记录 -->
+  <uses-permission android:name="android.permission.READ_CALL_LOG" />
+  <uses-permission android:name="android.permission.WRITE_CALL_LOG" />
+  ```
+
+- 步骤：
+
+  1. **检查App是否开启了制定权限**
+     - 调用ContextCompat的CheckSelfPermission方法
+  2. **请求系统弹窗，以便用户选择是否开启权限**
+     - 调用ActivityCompat的requestPerssion方法，即可命令系统自动弹出权限申请窗口
+  3. **判断用户的权限选择结果**
+     - 重写活动页面的权限请求回调方法onRequestPermissionResult，在该方法内部处理用户的权限选择结果
+
+- ```java
+  // util/PermissionUtil.java
+  package com.example.chapter07_client.util;
+  
+  import android.app.Activity;
+  import android.content.pm.PackageManager;
+  import android.os.Build;
+  
+  import androidx.core.content.ContextCompat;
+  
+  public class PermissionUtil {
+      // 检查多个权限。返回true表示已完全启用权限，返回false则表示有权限未启用
+      public static boolean checkPermissions(Activity act, String[] permissions, int requestCode) {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+              int check = PackageManager.PERMISSION_GRANTED;
+              for (String permission : permissions) {
+                  check = ContextCompat.checkSelfPermission(act, permission);
+                  if (check != PackageManager.PERMISSION_GRANTED) {
+                      act.requestPermissions(permissions, requestCode);
+                      return false;
+                  }
+              }
+          }
+          return true;
+      }
+  
+      public static boolean checkGrant(int[] grantResults) {
+          if (grantResults.length > 0) {
+              for (int grant : grantResults) {
+                  if (grant != PackageManager.PERMISSION_GRANTED) {
+                      return false;
+                  }
+              }
+              return true;
+          }
+          return false;
+      }
+  }
+  
+  // Activity.java
+  public class PermissionHungryActivity extends AppCompatActivity implements View.OnClickListener {
+  
+      private static final String[] PERMISSIONS_CONTACTS = new String[]{
+              Manifest.permission.READ_CONTACTS,
+              Manifest.permission.WRITE_CONTACTS
+      };
+  
+      private static final String[] PERMISSIONS_SMS = new String[]{
+              Manifest.permission.READ_SMS,
+              Manifest.permission.SEND_SMS
+      };
+  
+      private static final String[] PERMISSIONS_ALL = new String[]{
+              Manifest.permission.READ_CONTACTS,
+              Manifest.permission.WRITE_CONTACTS,
+              Manifest.permission.READ_SMS,
+              Manifest.permission.SEND_SMS
+      };
+  
+      private static final int REQUEST_CODE_ALL = 1;
+      private static final int REQUEST_CODE_CONTACTS = 2;
+      private static final int REQUEST_CODE_SMS = 3;
+  
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+          super.onCreate(savedInstanceState);
+          setContentView(R.layout.activity_permission_lazy);
+          
+          // Lazy 模式，有需求时获取对应权限
+          findViewById(R.id.btn_sms).setOnClickListener(this);
+          findViewById(R.id.btn_contact).setOnClickListener(this);
+  		
+          // Hungry 模式，启动即获取所有权限
+          PermissionUtil.checkPermissions(this, PERMISSIONS_ALL, REQUEST_CODE_ALL);
+      }
+  
+      @Override
+      public void onClick(View v) {
+          switch (v.getId()) {
+              case R.id.btn_sms:
+                  PermissionUtil.checkPermissions(this, PERMISSIONS_SMS, REQUEST_CODE_SMS);
+                  break;
+              case R.id.btn_contact:
+                  PermissionUtil.checkPermissions(this, PERMISSIONS_CONTACTS, REQUEST_CODE_CONTACTS);
+                  break;
+          }
+      }
+  
+      @Override
+      public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+          super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+          switch (requestCode) {
+              case REQUEST_CODE_ALL:
+                  if (PermissionUtil.checkGrant(grantResults)) {
+                      Log.d("bay", "权限获取成功！");
+                      ToastUtil.showMsg(this, "通讯录读写权限获取成功！");
+                  } else {
+                      // 部分权限获取失败
+                      for (int i = 0; i < grantResults.length; i++) {
+                          if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                              switch (permissions[i]) {
+                                  case Manifest.permission.READ_CONTACTS:
+                                  case Manifest.permission.WRITE_CONTACTS:
+                                      ToastUtil.showMsg(this, "通讯录读写权限获取失败！");
+                                      break;
+                                  case Manifest.permission.READ_SMS:
+                                  case Manifest.permission.SEND_SMS:
+                                      ToastUtil.showMsg(this, "短信读写权限获取失败！");
+                                      break;
+                              }
+                          }
+                      }
+                      ToastUtil.showMsg(this, "通讯录读写权限获取失败！");
+                      jumpToSetting();
+                  }
+                  break;
+              case REQUEST_CODE_CONTACTS:
+                  if (PermissionUtil.checkGrant(grantResults)) {
+                      Log.d("bay", "通讯录读写权限获取成功！");
+                      ToastUtil.showMsg(this, "通讯录读写权限获取成功！");
+                  } else {
+                      ToastUtil.showMsg(this, "通讯录读写权限获取失败！");
+                      jumpToSetting();
+                  }
+                  break;
+  
+              case REQUEST_CODE_SMS:
+                  if (PermissionUtil.checkGrant(grantResults)) {
+                      Log.d("bay", "短信读写权限获取成功！");
+                      ToastUtil.showMsg(this, "短信读写权限获取成功！");
+                  } else {
+                      ToastUtil.showMsg(this, "短信读写权限获取失败！");
+                      jumpToSetting();
+                  }
+                  break;
+          }
+      }
+  
+      // 跳到应用设置界面
+      private void jumpToSetting() {
+          Intent intent = new Intent();
+          intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+          intent.setData(Uri.fromParts("package", getPackageName(), null));
+          intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          startActivity(intent);
+      }
+  }
+  ```
+
+### 7.2.2 利用ContentResolver读写联系人
+
+```java
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.Contacts;
+import android.provider.ContactsContract.CommonDataKinds;
+
+public class ContactAddActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private EditText et_contact_name;
+    private EditText et_contact_phone;
+    private EditText et_contact_email;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_contact_add);
+
+        et_contact_name = findViewById(R.id.et_contact_name);
+        et_contact_phone = findViewById(R.id.et_contact_phone);
+        et_contact_email = findViewById(R.id.et_contact_email);
+        findViewById(R.id.btn_add_contact).setOnClickListener(this);
+        findViewById(R.id.btn_read_contact).setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_add_contact:
+                Contact contact = new Contact();
+                Contact.name = et_contact_name.getText().toString();
+                Contact.phone = et_contact_phone.getText().toString();
+                Contact.email = et_contact_email.getText().toString();
+
+                // 方式一，通过ContentResolver多次写入，每次一个字段
+//                addContact(getContentResolver(), contact);
+
+                // 方式二，批处理方式
+                // 每一次操作都是一个 ContentProviderOperation 对象，构建一个操作集合，然后一次性执行
+                // 保证了事物的一致性
+                addFullContacts(getContentResolver(), contact);
+                break;
+            case R.id.btn_read_contact:
+                readPhoneContacts(getContentResolver());
+                break;
+        }
+    }
+
+    @SuppressLint("Range")
+    private void readPhoneContacts(ContentResolver resolver) {
+        // 先查询 raw_contacts 表，获取联系人的id
+        Cursor cursor = resolver.query(ContactsContract.RawContacts.CONTENT_URI, new String[]{ContactsContract.RawContacts._ID}, null, null, null);
+        while (cursor.moveToNext()) {
+            int rawContactID = cursor.getInt(0);
+            // 再根据联系人的id查询 data 表，获取联系人的姓名、电话、邮箱等信息
+            Uri uri = Uri.parse("content://com.android.contacts/contacts/" + rawContactID + "/data");
+            Cursor dataCursor = resolver.query(uri, new String[]{ContactsContract.Data.MIMETYPE, ContactsContract.Data.DATA1, ContactsContract.Data.DATA2}, null, null, null);
+            Contact contact = new Contact();
+            while (dataCursor.moveToNext()) {
+                String data1 = dataCursor.getString(dataCursor.getColumnIndex(ContactsContract.Data.DATA1));
+                String miniType = dataCursor.getString(dataCursor.getColumnIndex(ContactsContract.Data.MIMETYPE));
+                switch (miniType) {
+                    case CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE:
+                        contact.name = data1;
+                        break;
+                    case CommonDataKinds.Phone.CONTENT_ITEM_TYPE:
+                        contact.phone = data1;
+                        break;
+                    case CommonDataKinds.Email.CONTENT_ITEM_TYPE:
+                        contact.email = data1;
+                        break;
+                }
+            }
+            dataCursor.close();
+            if (contact.name != null) {
+                Log.d("bay", contact.toString());
+            }
+        }
+    }
+
+    // 向手机通讯录一次性添加一个联系人信息（包括姓名、电话、邮箱）
+    private void addFullContacts(ContentResolver resolver, Contact contact) {
+        // 创建一个插入联系人记录的内容操作器
+        ContentProviderOperation op_main = ContentProviderOperation
+                .newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+                .build();
+
+        // 创建一个插入联系人姓名记录的内容操作器
+        ContentProviderOperation op_name = ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(ContactsContract.Data.MIMETYPE, CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                .withValue(CommonDataKinds.StructuredName.GIVEN_NAME, contact.name)
+                .build();
+
+        // 创建一个插入联系人电话记录的内容操作器
+        ContentProviderOperation op_phone = ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(ContactsContract.Data.MIMETYPE, CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                .withValue(CommonDataKinds.Phone.NUMBER, contact.phone)
+                .withValue(CommonDataKinds.Phone.TYPE, CommonDataKinds.Phone.TYPE_MOBILE)
+                .build();
+
+        // 创建一个插入联系人邮箱记录的内容操作器
+        ContentProviderOperation op_email = ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(ContactsContract.Data.MIMETYPE, CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+                .withValue(CommonDataKinds.Email.DATA, contact.email)
+                .withValue(CommonDataKinds.Email.TYPE, CommonDataKinds.Email.TYPE_WORK)
+                .build();
+
+        // 将上面的操作器添加到操作集合中
+        ArrayList<ContentProviderOperation> operations = new ArrayList<>();
+        operations.add(op_main);
+        operations.add(op_name);
+        operations.add(op_phone);
+        operations.add(op_email);
+
+        try {
+            resolver.applyBatch(ContactsContract.AUTHORITY, operations);
+        } catch (OperationApplicationException e) {
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // 往手机通讯录中添加一个联系人信息（包括姓名、电话、邮箱）
+    private void addContact(ContentResolver resolver, Contact contact) {
+        ContentValues values = new ContentValues();
+        // 往 raw_contacts 中添加联系人记录，并获取添加后的联系人编号
+        Uri uri = resolver.insert(ContactsContract.RawContacts.CONTENT_URI, values);
+        long rawContactId = ContentUris.parseId(uri);
+
+        ContentValues name = new ContentValues();
+        // 关联联系人编号
+        name.put(Contacts.Data.RAW_CONTACT_ID, rawContactId);
+        // “姓名”的数据类型
+        name.put(Contacts.Data.MIMETYPE, CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
+        // 联系人姓名
+        name.put(Contacts.Data.DATA2, contact.name);
+        // 添加联系人的姓名记录
+        resolver.insert(ContactsContract.Data.CONTENT_URI, name);
+
+
+        ContentValues phone = new ContentValues();
+        // 关联联系人编号
+        phone.put(Contacts.Data.RAW_CONTACT_ID, rawContactId);
+        // “电话”的数据类型
+        phone.put(Contacts.Data.MIMETYPE, CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+        // 联系人电话
+        phone.put(Contacts.Data.DATA1, contact.phone);
+        // 联系人电话类型
+        phone.put(Contacts.Data.DATA2, CommonDataKinds.Phone.TYPE_MOBILE);
+        // 添加联系人的电话记录
+        resolver.insert(ContactsContract.Data.CONTENT_URI, phone);
+
+        ContentValues email = new ContentValues();
+        // 关联联系人编号
+        email.put(Contacts.Data.RAW_CONTACT_ID, rawContactId);
+        // “邮箱”的数据类型
+        email.put(Contacts.Data.MIMETYPE, CommonDataKinds.Email.CONTENT_ITEM_TYPE);
+        // 联系人邮箱
+        email.put(Contacts.Data.DATA1, contact.email);
+        // 联系人邮箱类型。1表示家庭，2表示工作
+        email.put(Contacts.Data.DATA2, CommonDataKinds.Email.TYPE_WORK);
+        // 添加联系人的邮箱记录
+        resolver.insert(ContactsContract.Data.CONTENT_URI, email);
+    }
+}
+```
+
+### 7.2.3 利用ContentResolver监听短信
+
+```java
+package com.example.chapter07_client;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.database.ContentObserver;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+
+public class MonitorSmsActivity extends AppCompatActivity {
+
+    private SmsGetObserver mObserver;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_monitor_sms);
+        // 给指定Uri注册内容观察器，一旦发生数据变化，就触发观察器的onChange方法
+        Uri uri = Uri.parse("content://sms");
+        // notifyForDescendents:
+        // false:表示精确匹配，即只匹配该Uri,true:表示可以同时匹配其派生的Uri
+        // 假设UriMatcher 里注册的Uri共有一下类型：
+        // 1.content://AUTHORITIES/table
+        // 2.content://AUTHORITIES/table/#
+        // 3.content://AUTHORITIES/table/subtable
+        // 假设我们当前需要观察的Uri为content://AUTHORITIES/student:
+        // 如果发生数据变化的Uri为3。
+        // 当notifyForDescendents为false,那么该Contentobserver会监听不到，但是当notifyForDescendents
+        mObserver = new SmsGetObserver(this);
+        getContentResolver().registerContentObserver(uri, true, mObserver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getContentResolver().unregisterContentObserver(mObserver);
+    }
+
+    private static class SmsGetObserver extends ContentObserver {
+        private final Context mContext;
+
+        public SmsGetObserver(Context context) {
+            super(new Handler(Looper.getMainLooper()));
+            this.mContext = context;
+        }
+
+        @SuppressLint("Range")
+        @Override
+        public void onChange(boolean selfChange, @Nullable Uri uri) {
+            super.onChange(selfChange, uri);
+            // onChange会多次调用，收到一条短信会调用两次onChange
+            // mUri===content://sms/raw/20
+            // mUri===content://sms/inbox/20
+            // 安卓7.0以上系统，点击标记为已读，也会调用一次
+            // mUri===content://sms
+            // 收到一条短信都是uri后面都会有确定的一个数字，对应数据库的id,比如上面的20
+            Log.d("bay", "have2");
+            if (uri == null) {
+                return;
+            }
+            if (uri.toString().contains("content://sms/raw") ||
+                    uri.toString().equals("content://sms")) {
+                return;
+            }
+            Log.d("bay", "have");
+            Cursor cursor = mContext.getContentResolver().query(uri, new String[]{"address", "body", "date"},
+                    null, null, "date DESC");
+            if (cursor.moveToNext()) {
+                String sender = cursor.getString(cursor.getColumnIndex("address"));
+                String content = cursor.getString(cursor.getColumnIndex("body"));
+                Log.d("bay", String.format("sender:%s, content:%s", sender, content));
+            }
+            cursor.close();
+        }
+    }
+}
+```
+
+## 7.3 在应用之间共享文件
+
+### 7.3.1 使用相册图片发送彩信
+
+
+
+### 7.3.2 借助FileProvider发送彩信
+
+
+
+### 7.3.3 借助FileProvider安装应用
 

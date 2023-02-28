@@ -93,3 +93,5 @@ public class ShoppingDetailActivity extends AppCompatActivity implements View.On
         ToastUtil.show(this, "Add " + tv_title.getText().toString() + " to cart");
     }
 }
+
+
