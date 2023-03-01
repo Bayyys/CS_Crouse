@@ -14,5 +14,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Test"
 include ':app'
-include ':chapter07-client'
-include ':chapter07-server'
+include ':chapter08'
+include ':chapter09'
