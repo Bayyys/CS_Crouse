@@ -108,19 +108,22 @@ public class FileUtil {
     // 检查文件是否存在，以及文件路径是否合法
     public static boolean checkFileUri(Context ctx, String path) {
         File file = new File(path);
-        Log.d("ning", "old path:" + path);
+        Log.d("bay", "old path:" + path);
         if (!file.exists() || !file.isFile() || file.length() <= 0) {
+            Log.d("bay", "file not exists");
             return false;
         }
         try {
             // 检测文件路径是否支持 FileProvider 访问方式，如果发生异常，说明不支持
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Log.d("bay", "new path:" + file.getAbsolutePath());
                 FileProvider.getUriForFile(ctx, ctx.getString(R.string.file_provider), file);
             }
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
+        Log.d("bay", "file exists");
         return true;
     }
 }

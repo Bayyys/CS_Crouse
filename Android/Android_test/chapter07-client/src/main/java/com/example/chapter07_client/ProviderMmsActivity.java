@@ -59,7 +59,7 @@ public class ProviderMmsActivity extends AppCompatActivity {
 
         //手动让MediaStore扫描入库
         MediaScannerConnection.scanFile(this,
-                new String[]{Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString()},
+                new String[]{Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/com.example.chapter06"},
                 null, null);
 
         if (PermissionUtil.checkPermissions(this, PERMISSIONS, PERMISSION_REQUEST_CODE)) {
@@ -124,9 +124,9 @@ public class ProviderMmsActivity extends AppCompatActivity {
         Cursor cursor = getContentResolver().query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 columns,
-                "_size < 307200",
                 null,
-                "_size DESC"
+                null,
+                null
         );
         int count = 0;
         if (cursor != null) {
@@ -140,10 +140,8 @@ public class ProviderMmsActivity extends AppCompatActivity {
                     count++;
                     mImageList.add(image);
                 }
-                Log.d("ning", "image:" + image.toString());
             }
         }
-
     }
 
     // 发送带图片的彩信
@@ -154,7 +152,7 @@ public class ProviderMmsActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             // 通过FileProvider获得文件的Uri访问方式
             uri = FileProvider.getUriForFile(this, getString(R.string.file_provider), new File(path));
-            Log.d("ning", String.format("new uri:%s", uri.toString()));
+            Log.d("bay", String.format("new uri:%s", uri.toString()));
         }
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

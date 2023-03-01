@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- sc card 下所有文件都可以访问 -->
+    <!--    <external-path name="external_storage_root" path="." />-->
+    <!-- 通过FileProvider访问应用内部存储的私有目录 -->
+    <external-path
+        name="external_storage_download"
+        path="Download/." />
+
+</paths>
