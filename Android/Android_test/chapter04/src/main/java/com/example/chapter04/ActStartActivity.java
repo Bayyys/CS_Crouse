@@ -12,7 +12,7 @@ import android.widget.Button;
 
 public class ActStartActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private  static final String TAG = "NING";
+    private  static final String TAG = "bay";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

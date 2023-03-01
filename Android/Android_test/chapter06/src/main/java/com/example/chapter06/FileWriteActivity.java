@@ -65,7 +65,7 @@ public class FileWriteActivity extends AppCompatActivity implements View.OnClick
                 // 内部存储私有空间
 //                directory = getFilesDir().toString();
                 path = directory + File.separatorChar + fileName;
-                Log.d("ning", path);
+                Log.d("bay", path);
                 FileUtil.saveText(path, sb.toString());
                 ToastUtil.show(this, "保存成功");
                 break;

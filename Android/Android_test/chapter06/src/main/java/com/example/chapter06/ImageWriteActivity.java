@@ -36,7 +36,7 @@ public class ImageWriteActivity extends AppCompatActivity implements View.OnClic
                 String fileName = System.currentTimeMillis() + ".png";
                 // 获取app外部存储的私有空间
                 path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + File.separatorChar + fileName;
-                Log.d("ning", path);
+                Log.d("bay", path);
                 // 从资源文件中获取Bitmap对象
                 Bitmap b1 = BitmapFactory.decodeResource(getResources(), R.drawable.ting1);
                 FileUtil.saveImage(path, b1);
