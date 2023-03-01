@@ -317,7 +317,7 @@ android.intent.action.MAIN的activity说明它是入口页面 -->
 
 # 3. 简单控件
 
-## 3.1 文本显示
+## 3.1 文本显示TextView
 
 ### 3.1.1 文本内容
 
@@ -2973,7 +2973,7 @@ public void onClick(View v) {
      >
      > 3. ```java
      >    package com.example.chapter07_server.provider;
-     >    
+     >                                           
      >    import android.content.ContentProvider;
      >    import android.content.ContentValues;
      >    import android.content.UriMatcher;
@@ -2981,31 +2981,31 @@ public void onClick(View v) {
      >    import android.database.sqlite.SQLiteDatabase;
      >    import android.net.Uri;
      >    import android.util.Log;
-     >    
+     >                                           
      >    import com.example.chapter07_server.UserInfoContent;
      >    import com.example.chapter07_server.database.UserDBHelper;
-     >    
+     >                                           
      >    public class UserInfoProvider extends ContentProvider {
-     >    
+     >                                           
      >        private UserDBHelper dbHelper;
      >        private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-     >    
+     >                                           
      >        private static final int USERS = 1;
      >        private static final int USER = 2;
-     >    
+     >                                           
      >        static {
      >            // 往Uri匹配器中添加指定的数据路径
      >            URI_MATCHER.addURI(UserInfoContent.AUTHORITIES, "user", USERS);
      >            URI_MATCHER.addURI(UserInfoContent.AUTHORITIES, "user/#", USER);
      >        }
-     >    
+     >                                           
      >        @Override
      >        public boolean onCreate() {
      >            Log.d("bay", "UserInfoProvider onCreate");
      >            dbHelper = UserDBHelper.getInstance(getContext());
      >            return true;
      >        }
-     >    
+     >                                           
      >        // content://com.example.chapter07_server.provider.UserInfoProvider/user
      >        @Override
      >        public Uri insert(Uri uri, ContentValues values) {
@@ -3017,7 +3017,7 @@ public void onClick(View v) {
      >            db.insert(UserDBHelper.TABLE_NAME, null, values);
      >            return uri;
      >        }
-     >    
+     >                                           
      >        @Override
      >        public int delete(Uri uri, String selection, String[] selectionArgs) {
      >            int count = 0;
@@ -3028,7 +3028,7 @@ public void onClick(View v) {
      >                case USERS:
      >                    count = db.delete(UserDBHelper.TABLE_NAME, selection, selectionArgs);
      >                    break;
-     >    
+     >                                           
      >                // content://com.example.chapter07_server.provider.UserInfoProvider/user/1
      >                // 删除单行
      >                case USER:
@@ -3039,21 +3039,21 @@ public void onClick(View v) {
      >            db.close();
      >            return count;
      >        }
-     >    
+     >                                           
      >        @Override
      >        public int update(Uri uri, ContentValues values, String selection,
      >                          String[] selectionArgs) {
-     >    
+     >                                           
      >            throw new UnsupportedOperationException("Not yet implemented");
      >        }
-     >    
+     >                                           
      >        @Override
      >        public String getType(Uri uri) {
      >            // TODO: Implement this to handle requests for the MIME type of the data
      >            // at the given URI.
      >            throw new UnsupportedOperationException("Not yet implemented");
      >        }
-     >    
+     >                                           
      >        @Override
      >        public Cursor query(Uri uri, String[] projection, String selection,
      >                            String[] selectionArgs, String sortOrder) {
@@ -3592,13 +3592,1275 @@ public class MonitorSmsActivity extends AppCompatActivity {
 
 ## 7.3 在应用之间共享文件
 
-### 7.3.1 使用相册图片发送彩信
+### 7.3.1 使用相册图
 
+```java
+// 打开系统相册的意图
+case R.id.iv_appendix:
+                // 跳转到系统相册，选择图片，并返回
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                // 设置图片类型
+                intent.setType("image/*");
+                // 启动系统相册
+                mResultLauncher.launch(intent);
+                break;
 
+// 调用返回意图的getData方法获取照片路径
+mResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == RESULT_OK) {
+                            // 获取返回的数据
+                            Intent intent = result.getData();
+                            picUri = intent.getData();
+                            if (picUri != null) {
+                                iv_appendix.setImageURI(picUri);
+                                Log.d("bay", "图片路径：" + picUri.getPath().toString());
+                            }
+                        }
+                    }
+                }
+        );
+
+// 跳转信息应用并发送
+private void sendMms(String phone, String title, String message) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // Intent 的接受者将被准许读取Intent 携带的URI数据
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        // 添加内容
+        intent.putExtra("address", phone);
+        intent.putExtra("subject", title);
+        intent.putExtra("sms_body", message);
+        // 添加附件
+        intent.putExtra(Intent.EXTRA_STREAM, picUri);
+        // 设置类型
+        intent.setType("image/*");
+        // 未指定页面，所以系统会在底部弹出选择窗口
+        startActivity(intent);
+        ToastUtil.showMsg(this, "请选择发送应用");
+    }
+```
 
 ### 7.3.2 借助FileProvider发送彩信
 
+- 修改FileProvider的权限
 
+  1. 设置允许访问的路径
+
+     ```xml
+     <?xml version="1.0" encoding="utf-8"?>
+     <paths>
+         <!-- sc card 下所有文件都可以访问 -->
+     	<!-- <external-path name="external_storage_root" path="." />-->
+         
+         <!-- 通过FileProvider访问应用内部存储的私有目录 -->
+         <external-path
+             name="external_storage_download"
+             path="Download/com.example.chapter06/" />
+     
+     </paths>
+     ```
+
+  2. 设置权限
+
+     ```xml
+             <provider
+                 android:name="androidx.core.content.FileProvider"
+                 android:authorities="@string/file_provider"
+                 android:grantUriPermissions="true" >
+                 <!--配置哪些路径是可以通过FileProvider访问的-->
+                 <meta-data
+                     android:name="android.support.FILE_PROVIDER_PATHS"
+                     android:resource="@xml/file_paths" />
+             </provider>
+     ```
+
+- 加载图像列表
+
+  ```java
+  	private List<ImageInfo> mImageList = new ArrayList<ImageInfo>(); // 图片列表
+  	
+  	@SuppressLint("Range")
+      private void loadImageList() {
+          //MediaStore
+          String[] columns = new String[]{
+                  MediaStore.Images.Media._ID, // 编号
+                  MediaStore.Images.Media.TITLE, // 标题
+                  MediaStore.Images.Media.SIZE,// 文件大小
+                  MediaStore.Images.Media.DATA,// 文件路径
+          };
+          // 图片大小在300KB以内
+          Cursor cursor = getContentResolver().query(
+                  MediaStore.Images.Media.EXTERNAL_CONTENT_URI,	// 相册的uri
+                  columns,
+                  null,
+                  null,
+                  null
+          );
+          // 查询相册媒体库，并返回结果集的游标。“_size asc”表示按照文件大小升序排列
+          int count = 0;
+          if (cursor != null) {
+              while (cursor.moveToNext() && count < 6) {
+                  ImageInfo image = new ImageInfo();
+                  image.id = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media._ID));
+                  image.name = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.TITLE));
+                  image.size = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media.SIZE));
+                  image.path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                  if (FileUtil.checkFileUri(this, image.path)) {
+                      count++;
+                      mImageList.add(image);
+                  }
+              }
+          }
+      }
+  ```
+
+- 发送带图片附件的彩信
+
+  ```java
+  private void sendMms(String phone, String title, String message, String path) {
+          // 根据指定路径创建一个Uri对象
+          Uri uri = Uri.parse(path);
+          // 兼容Android7.0，把访问文件的Uri方式改为FileProvider
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+              // 通过FileProvider获得文件的Uri访问方式
+              uri = FileProvider.getUriForFile(this, getString(R.string.file_provider), new File(path));
+              Log.d("ning", String.format("new uri:%s", uri.toString()));
+          }
+          Intent intent = new Intent(Intent.ACTION_SEND);
+          intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          // Intent 的接受者将被准许读取Intent 携带的URI数据
+          intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+          // 彩信发送的目标号码
+          intent.putExtra("address", phone);
+          // 彩信的标题
+          intent.putExtra("subject", title);
+          // 彩信的内容
+          intent.putExtra("sms_body", message);
+          // 彩信的图片附件
+          intent.putExtra(Intent.EXTRA_STREAM, uri);
+          // 彩信的附件为图片
+          intent.setType("image/*");
+          // 因为未指定要打开哪个页面，所以系统会在底部弹出选择窗口
+          startActivity(intent);
+          ToastUtil.showMsg(this, "请在弹窗中选择短信或者信息应用");
+      }
+  ```
+
+- 整体流程 （扫描入库 -> 加载图片 -> 显示图片网格 -> 点击发送）
+
+  ```java
+          //手动让MediaStore扫描入库
+          MediaScannerConnection.scanFile(this,
+                  new String[]{Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/com.example.chapter06"},
+                  null, null);
+  
+          if (PermissionUtil.checkPermissions(this, PERMISSIONS, PERMISSION_REQUEST_CODE)) {
+              // 加载图片列表
+              loadImageList();
+              // 显示图像网格
+              showImageGrid();
+          }
+  
+          // ...
+  		// 添加图片的点击事件
+          iv_appendix.setOnClickListener(v -> {
+                  sendMms(et_phone.getText().toString(),
+                          et_title.getText().toString(),
+                          et_message.getText().toString(),
+                          image.path);
+              });
+  ```
 
 ### 7.3.3 借助FileProvider安装应用
 
+```java
+private void installApk() {
+        String apkPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/app-release.apk";
+        Log.d("ning", "apkPath:" + apkPath);
+        // 获取应用包管理器
+        PackageManager pm = getPackageManager();
+        // 获取apk文件的包信息
+        PackageInfo pi = pm.getPackageArchiveInfo(apkPath, PackageManager.GET_ACTIVITIES);
+        if (pi == null) {
+            ToastUtil.showMsg(this, "安装文件已经损坏!");
+            return;
+        }
+        // installer
+        Uri uri = Uri.parse(apkPath);
+        // 兼容Android7.0，把访问文件的Uri方式改为FileProvider
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // 通过FileProvider获得文件的Uri访问方式
+            uri = FileProvider.getUriForFile(this, getString(R.string.file_provider), new File(apkPath));
+            Log.d("ning", String.format("new uri:%s", uri.toString()));
+        }
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        // 设置Uri的数据类型为APK文件
+        intent.setDataAndType(uri, "application/vnd.android.package-archive");
+        // 启动系统自带的应用安装程序
+        startActivity(intent);
+    }
+```
+
+- ```xml
+  <!-- 安装应用请求，Android8.0需要 -->
+  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+  ```
+
+# 8. 高级控件
+
+## 8.1 下拉列表Spinner
+
+### 8.1.1 下拉列表
+
+- `spinnerMode` dropdown(下拉列表方式) 、dialog(对话框方式)
+
+- Java 方法
+
+  1. setPrompt：设置标题文字。注意对话框模式才显示标题，下拉模式不显示标题。
+  2. setAdapter：设置列表项的数据适配器。
+  3. setSelection：设置当前选中哪项。注意该方法要在setAdapter方法后调用。
+  4. setOnItemSelectedListener：设置下拉列表的选择监听器，该监听器要实现接口OnItemSelectedListener
+
+- ```java
+  private final static String[] array = {"null", "101", "102", "103", "104", "105", "106", "107", "108", "109", "110"};
+  
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+          Spinner sp_dropdown = findViewById(R.id.sp_dropdown);
+          // 声明一个数组适配器
+          ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_select, array);
+          sp_dropdown.setPrompt("请选择房间号"); // 设置下拉列表的标题, 仅在dialog模式下有效
+          sp_dropdown.setAdapter(adapter);    // 设置下拉列表的数据源
+          sp_dropdown.setSelection(0);    // 设置默认选中项，此处为默认选中第0个值
+          sp_dropdown.setOnItemSelectedListener(this);    // 设置下拉列表的监听器
+      }
+  
+      @Override
+      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+          ToastUtil.show(this, "您选择的是：" + array[position]);
+      }
+  
+      @Override
+      public void onNothingSelected(AdapterView<?> parent) {
+  
+      }
+  ```
+
+- 
+
+### 8.1.2 适配器Adapter
+
+- 条目列表 + 数据集合
+
+#### 1. 数组适配器**ArrayAdapter**
+
+- 最简单的适配器，只展示一行文字
+- 配置步骤
+  - 编写列表项的XML文件，内部布局只有一个TextView标签
+  - 调用ArrayAdapter的构造方法，填入待展现的字符串数组，以及列表项的XML文件（R.layout.item_select)
+  - 调用下拉框控件的setAdapter方法，传入第二步得到的适配器实例
+
+#### 2. 简单适配器SimpleAdapter
+
+```java
+Spinner sp_icon = findViewById(R.id.sp_icon);
+
+// 初始化列表
+initList();
+// 创建SimpleAdapter对象
+SimpleAdapter startAdapter = new SimpleAdapter(this, list, R.layout.item_simple,
+                                               new String[]{"icon", "name"}, new int[]{R.id.iv_icon, R.id.tv_name});
+// 设置下拉列表的风格
+sp_icon.setAdapter(startAdapter);
+sp_icon.setPrompt("请选择行星");
+sp_icon.setSelection(0);
+sp_icon.setOnItemSelectedListener(this);
+
+
+// 辅助函数
+private void initList() {
+        for (int i = 0; i < iconArray.length; i++) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("icon", iconArray[i]);
+            map.put("name", nameArray[i]);
+            list.add(map);
+        }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Map<String, Object> map = list.get(position);
+        String name = (String) map.get("name");
+        ToastUtil.show(this, "您选择的行星是：" + name);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+
+```
+
+#### 3. 基本适配器BaseAdapter
+
+- 方法
+
+  1. 构造方法：指定适配器需要处理的数据集合。
+  2. getCount：获取列表项的个数。
+  3. getItem：获取列表项的数据。
+  4. getItemId：获取列表项的编号。
+  5. getView：获取每项的展示视图，并对每项的内部控件进行业务处理。
+
+- 步骤
+
+  1. 列表项布局文件
+
+  2. 继承BaseAdapter的适配器
+
+     - 复用ConvertView
+
+       > 列表个数是有限的，在用完Item后，可复用之前的convertView
+
+     ```java
+     package com.example.chapter08.adapter;
+     
+     import android.content.Context;
+     import android.view.LayoutInflater;
+     import android.view.View;
+     import android.view.ViewGroup;
+     import android.widget.BaseAdapter;
+     import android.widget.ImageView;
+     import android.widget.TextView;
+     
+     import com.example.chapter08.R;
+     import com.example.chapter08.entity.Planet;
+     
+     import java.util.List;
+     
+     public class PlanetBaseAdapter extends BaseAdapter {
+     
+         private Context mContext;
+         private List<Planet> mPlaneList;
+     
+         public PlanetBaseAdapter(Context mContext, List<Planet> mPlaneList) {
+             this.mContext = mContext;
+             this.mPlaneList = mPlaneList;
+         }
+     
+         // 获取列表项的个数
+         @Override
+         public int getCount() {
+             return mPlaneList.size();
+         }
+     
+         @Override
+         public Object getItem(int position) {
+             return mPlaneList.get(position);
+         }
+     
+         @Override
+         public long getItemId(int position) {
+             return position;
+         }
+     
+         @Override
+         public View getView(int position, View convertView, ViewGroup parent) {
+             ViewHolder holder;
+             if (convertView == null){
+                 // 根据布局文件item_list.xml生成转换视图对象
+                 convertView = LayoutInflater.from(mContext).inflate(R.layout.item_list, null);
+                 holder = new ViewHolder();
+                 holder.iv_icon = convertView.findViewById(R.id.iv_icon);
+                 holder.tv_name = convertView.findViewById(R.id.tv_name);
+                 holder.tv_desc = convertView.findViewById(R.id.tv_desc);
+                 // 将视图持有者保存到转换视图当中
+                 convertView.setTag(holder);
+             }else{
+                 holder = (ViewHolder) convertView.getTag();
+             }
+     
+             // 给控制设置好数据
+             Planet planet = mPlaneList.get(position);
+             holder.iv_icon.setImageResource(planet.image);
+             holder.tv_name.setText(planet.name);
+             holder.tv_desc.setText(planet.desc);
+     
+             return convertView;
+         }
+     
+         public final class ViewHolder {
+             public ImageView iv_icon;
+             public TextView tv_name;
+             public TextView tv_desc;
+         }
+     }
+     ```
+
+  3. 创建适配器并设置
+
+## 8.2 列表类视图ListView
+
+### 8.2.1 列表视图ListView
+
+- 通过setAdapter方法设置列表项的数据适配器，操作中调用`setOnItemClickListener` 和 `setOnItemLongClickListener` 方法设置列表项的监听器
+
+  - 除此之外，还新增了几个属性与方法
+
+    | XML中的属性   | ListView类的设置方法 | 说明                                                    |
+    | ------------- | -------------------- | ------------------------------------------------------- |
+    | divider       | setDivider           | 指定分割线的图形。如需取消分割线，可将该属性值设为@null |
+    | dividerHeight | setDividerHeight     | 指定分割线的高度                                        |
+    | listSelector  | setSelector          | 指定列表项的按压背景(状态图形格式)                      |
+
+- ```java
+  protected void onCreate(Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
+      setContentView(R.layout.activity_list_view);
+      // 从布局文件中获取名叫lv_planet的列表视图
+      lv_planet = findViewById(R.id.lv_planet);
+      // 获取行星列表
+      planetList = Planet.getDefaultList();
+      // 创建一个行星列表的基于适配器
+      PlanetBaseAdapter adapter = new PlanetBaseAdapter(this, planetList);
+      // 给lv_planet设置行星列表的基于适配器
+      lv_planet.setAdapter(adapter);
+      // 给lv_planet设置列表项的点击监听器
+      lv_planet.setOnItemClickListener(this);
+      // 从布局文件中获取名叫ck_divider的复选框
+      ck_diviver = findViewById(R.id.ck_divider);
+      ck_diviver.setOnCheckedChangeListener(this);
+      ck_selector = findViewById(R.id.ck_selector);
+      ck_selector.setOnCheckedChangeListener(this);
+  }
+  
+  @Override
+  public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+      ToastUtil.show(this, "您选择的是：" + planetList.get(position).name);
+  }
+  
+  @Override
+  public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+      switch (buttonView.getId()) {
+          case R.id.ck_divider:
+              // 显示分隔线
+              if (ck_diviver.isChecked()) {
+                  // 从资源文件获得图形对象
+                  Drawable drawable = getResources().getDrawable(R.color.black, getTheme());
+                  // 设置列表视图的分隔线
+                  lv_planet.setDivider(drawable);
+                  // 设置列表视图的分隔线高度
+                  lv_planet.setDividerHeight(Utils.dip2px(this, 1));
+              } else {
+                  lv_planet.setDivider(null);
+                  lv_planet.setDividerHeight(0);
+              }
+              break;
+  
+          case R.id.ck_selector:
+              // 显示按压背景
+              if (ck_selector.isChecked()) {
+                  // 设置列表项的按压状态图形
+                  lv_planet.setSelector(R.drawable.list_selector);
+              } else {
+                  Drawable drawable = getResources().getDrawable(R.color.transparent, getTheme());
+                  lv_planet.setSelector(drawable);
+              }
+              break;
+      }
+  }
+  ```
+
+- ListView设置注意事项：
+
+  1. 修改列表视图的分割线样式
+
+     > 1. divider属性设置为@null时，不能再将dividerHeight属性设置为大于0的数值，因为这会导致最后一项没法完全显示，底部有一部分被掩盖了。原因是列表高度为wrap_content时，系统已按照没有分隔线的情况计算列表高度，此时dividerHeight占用了n-1块空白分隔区域，使得最后一项被挤到背影里面去了。
+     > 2. 通过代码设置的话，务必先调用setDivider方法再调用setDividerHeight方法。如果先调用setDividerHeight后调用setDivider，分隔线高度就会变成分隔图片的高度，而不是setDividerHeight设置的高度。XML布局文件则不存在divider属性和dividerHeight属性的先后顺序问题。
+
+  2. 修改列表项的按压背景
+
+     > 1. 在布局文件中取消按压背景的话，直接将listSelector属性设置为@null并不合适，因为尽管设为
+     >
+     >    @null，按压列表项时仍出现橙色背景。只有把listSelector属性设置为透明色才算真正取消背景，此时listSelector的属性值如下所示（事先在colors.xml中定义好透明色）：
+     >
+     >    ```xml
+     >    android:listSelector="@color/transparent"
+     >    ```
+     >
+     > 2. 在代码中取消按压背景的话，调用setSelector方法不能设置null值，因为null值会在运行时报空指针异常。正确的做法是先从资源文件获得透明色的图形对象，再调用setSelector方法设置列表项的按压状态图形，设置按压背景的代码如下所示：
+     >
+     >    ```xml
+     >    // 从资源文件获得图形对象
+     >    Drawable drawable = getResources().getDrawable(R.color.transparent);
+     >    lv_planet.setSelector(drawable); // 设置列表项的按压状态图形
+     >    ```
+
+  3. **列表高度问题**
+
+     > 在XML文件中，如果ListView后面还有其他平级的控件，就要将ListView的高度设为0dp，同时权重设为1，确保列表视图扩展到剩余的页面区域；如果ListView的高度设置为wrap_content，系统就只给列表视图预留一行高度。
+
+  4. 列表项点击问题
+
+     > 但是如果列表项中存在编辑框或按钮（含Button、ImageButton、Checkbox等），点击列表项就无法触发点击事件了。缘由在于编辑框和按钮这类控件会抢占焦点。
+     >
+     > 为了规避焦点抢占的问题，列表视图允许开发者自行设置内部视图的焦点抢占方式，该方式在XML文件中由`descendantFocusability`属性指定，在代码中由`setDescendantFocusability`方法设置，详细的焦点如下：
+     >
+     > | 抢占方式说明       | 代码中的焦点抢占类型               | XML文件中的抢占属性 |
+     > | ------------------ | ---------------------------------- | ------------------- |
+     > | 在子控件之前处理   | ViewGroup.FOCUS_BEFORE_DESCENDANTS | beforeDescendants   |
+     > | 在子控件之后处理   | ViewGroup.FOCUS_AFTER_DESCENDANTS  | afterDescendants    |
+     > | ==不让子控件处理== | ViewGroup.FOCUS_BLOCK_DESCENDANTS  | blocksDescendants   |
+     >
+     > ==注意焦点抢占方式不是由ListView设置，而是由列表项的根布局设置，也就是item_***.xml的根节点。==
+
+### 8.2.2 网格视图GridView
+
+- 用于分行分列显示表格信息，比列表视图更适合展示物品清单
+
+- 沿用列表视图的3个方法setAdapter、setOnItemClickListener、setOnItemLongClickListener
+
+- 新增了部分属性与方法
+
+  - | XML中的属性 | 代码中的设置方法 | 说明 |
+	  | ---- | ----| ---- |
+	  | horizontalSpacing | setHorizontalSpacing | 指定网格项在水平方向的间距 |
+	  | verticalSpacing | setVerticalSpacing | 指定网格项在垂直方向的间距| 
+	  | numColumns | setNumColumns | 指定列的数目 |
+	  | stretchMode | setStretchMode | 指定剩余空间的拉伸模式。拉伸模式取值如下 | 
+	  | column Width | setColumnWidth | 指定每列的宽度。拉伸模式为spacingWidth、spacingWidthUniform时，必须指定列宽 |
+	
+	- 拉伸模式取值说明
+	
+		| XML中的拉伸模式 | GridView类的拉伸模式 | 说明 |
+| ---- | ---- | ---- |
+| none | NO_STRETCH | 不拉伸 |
+| column Width | STRETCH_COLUMN_WIDTH |若有剩余空间，则拉伸列宽挤掉空隙|
+| spacing Width | STRETCH_SPACING | 若有剩余空间，则列宽不变，把空间分配到每列间的空隙 |
+| spacingWidthUniform | STRETCH_SPACING_UNIFORM | 若有剩余空间，则列宽不变，把空间分配到每列左右的空隙 |
+
+## 8.3 翻页类视图
+
+### 8.3.1 翻页视图ViewPager
+
+- 翻页适配器`PagerAdapter`
+
+  > - 构造方法：指定适配器需要处理的数据集合。
+  > - getCount：获取页面项的个数。
+  > - isViewFromObject：判断当前视图是否来自指定对象，返回view == object即可。
+  > - instantiateItem：实例化指定位置的页面，并将其添加到容器中。
+  > - destroyItem：从容器中销毁指定位置的页面。
+  > - getPageTitle：获得指定页面的标题文本，有搭配翻页标签栏时才要实现该方法。
+
+  ```java
+  package com.example.chapter08.adapter;
+  
+  import android.content.Context;
+  import android.view.View;
+  import android.view.ViewGroup;
+  import android.widget.ImageView;
+  
+  import androidx.annotation.NonNull;
+  import androidx.annotation.Nullable;
+  import androidx.viewpager.widget.PagerAdapter;
+  
+  import com.example.chapter08.ViewPagerActivity;
+  import com.example.chapter08.entity.GoodsInfo;
+  
+  import java.util.ArrayList;
+  import java.util.List;
+  
+  public class ImagePagerAdapater extends PagerAdapter {
+  
+      private final Context mContext;
+      private final ArrayList<GoodsInfo> mGoodsList;
+      // 声明一个图像视图列表
+      private List<ImageView> mViewList = new ArrayList<>();
+  
+      public ImagePagerAdapater(Context mContext, ArrayList<GoodsInfo> mGoodsList) {
+          this.mContext = mContext;
+          this.mGoodsList = mGoodsList;
+          // 给每个商品分配一个专用的图像视图
+          for (GoodsInfo info : mGoodsList) {
+              ImageView view = new ImageView(mContext);
+              view.setLayoutParams(new ViewGroup.LayoutParams(
+                      ViewGroup.LayoutParams.MATCH_PARENT,
+                      ViewGroup.LayoutParams.WRAP_CONTENT
+              ));
+              view.setImageResource(info.pic);
+              mViewList.add(view);
+          }
+      }
+  
+      @Override
+      public int getCount() {
+          return mViewList.size();
+      }
+  
+      @Override
+      public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
+          return view == object;
+      }
+  
+      // 实例化指定位置的页面，并将其添加到容器中
+      @NonNull
+      @Override
+      public Object instantiateItem(@NonNull ViewGroup container, int position) {
+          // 添加一个view到container中，而后返回一个跟这个view可以关联起来的对象，
+          // 这个对象能够是view自身，也能够是其余对象，
+          // 关键是在isViewFromObject可以将view和这个object关联起来
+          ImageView item = mViewList.get(position);
+          container.addView(item);
+          return item;
+      }
+  
+      // 从容器中销毁指定位置的页面
+      @Override
+      public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
+          container.removeView(mViewList.get(position));
+      }
+  
+      @Nullable
+      @Override
+      public CharSequence getPageTitle(int position) {
+          return mGoodsList.get(position).name;
+      }
+  }
+  ```
+
+- 页面变更监听器`addOnPageChangeListener`
+
+  - 监听器需实现接口addOnPageChangeListener下的3个方法，具体说明如下。　
+    - onPageScrollStateChanged：在页面滑动状态变化时触发。　
+      - 翻页状态改变时触发。state取值说明为：0表示静止，1表示正在滑动，2表示滑动完毕
+      - 在翻页过程中，状态值变化依次为：正在滑动→滑动完毕→静止
+    - onPageScrolled：在页面滑动过程中触发。　
+      - 在翻页过程中触发。该方法的三个参数取值说明为 ：第一个参数表示当前页面的序号
+      - 第二个参数表示页面偏移的百分比，取值为0到1；第三个参数表示页面的偏移距离
+    - onPageSelected：在选中页面时，即滑动结束后触发。
+      - 在翻页结束后触发。position表示当前滑到了哪一个页面
+  - 多数情况只用`onPageSelected`方法 —> 简化方法`SimpleOnPageChangeListener` (仅需实现)
+
+- ViewPager常用方法：
+
+  1. setAdapter：设置页面项的适配器。适配器用的是PagerAdapter及其子类。
+  2. setCurrentItem：设置当前页码，也就是要显示哪个页面。
+  3. addOnPageChangeListener：添加翻页视图的页面变更监听器。
+
+- 在XML文件中添加ViewPager时注意指定完整路径的节点名称，示例如下：
+
+  ```xml
+  <!-- 注意翻页视图ViewPager的节点名称要填全路径 -->
+  <androidx.viewpager.widget.ViewPager
+      android:id="@+id/vp_content"
+      android:layout_width="match_parent"
+      android:layout_height="370dp" />
+  ```
+
+### 8.3.2 PagerTabStrip
+
+- ViewPager节点内部添加PagerTabStrip节点
+	```xml
+	<!-- 注意翻页视图ViewPager的节点名称要填全路径 -->
+	<androidx.viewpager.widget.ViewPager
+    android:id="@+id/vp_content"
+    android:layout_width="match_parent"
+    android:layout_height="400dp">
+    
+    <!-- 注意翻页标签栏PagerTabStrip的节点名称要填全路径 -->
+    <androidx.viewpager.widget.PagerTabStrip
+        android:id="@+id/pts_tab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+	</androidx.viewpager.widget.ViewPager>
+	```
+	
+- ImagePagerAdapater.java 中重写getPageTitle方法
+
+  ```java
+  // 获得指定页面的标题文本
+  public CharSequence getPageTitle(int position) {
+  	return mGoodsList.get(position).name;
+  }
+  ```
+
+- 修改翻页标签栏的文本样式，必须在Java代码中调用setTextSize和setTextColor方法才行。PagerTabStrip不支持在XML文件中设置文本大小和文本颜色，只能在代码中设置文本样式
+
+  ```java
+  // 初始化翻页标签栏
+  private void initPagerStrip() {
+      // 从布局视图中获取名叫pts_tab的翻页标签栏
+      PagerTabStrip pts_tab = findViewById(R.id.pts_tab);
+      // 设置翻页标签栏的文本大小
+      pts_tab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+      pts_tab.setTextColor(Color.BLACK); // 设置翻页标签栏的文本颜色
+  }
+  ```
+
+## 8.4 碎片Fragment
+
+![image-20230301182858752](https://s2.loli.net/2023/03/01/hij71gwdvNZyt9P.png)
+
+### 8.4.1 碎片的静态注册
+
+- 静态注册指的是在XML文件中直接放置fragment节点，类似于一个普通控件，可被多个布局文件同时引用。静态注册一般用于某个通用的页面部件（如Logo条、广告条等），每个活动页面均可直接引用该部件。
+
+  - fragment节点必须指定id属性，否则App运行会报错。
+
+  - fragment节点必须通过name属性指定碎片类的完整路径。
+
+    ```xml
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <!-- 把碎片当作一个控件使用，其中android:name指明了碎片来源 -->
+    <fragment
+    android:id="@+id/fragment_static"
+    android:name="com.example.chapter08.fragment.StaticFragment"
+    android:layout_width="match_parent"
+    android:layout_height="60dp" />
+    <TextView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:text="这里是每个页面的具体内容"
+    android:textColor="#000000"
+    android:textSize="17sp" />
+    </LinearLayout>
+    ```
+
+### 8.4.2 碎片的动态注册
+
+- `FragmentPagerAdapter`
+
+  ```java
+  public class MobilePagerAdapter extends FragmentPagerAdapter {
+      
+      private List<GoodsInfo> mGoodsList = new ArrayList<GoodsInfo>(); // 声明一个商
+      品列表
+          
+      // 碎片页适配器的构造方法，传入碎片管理器与商品信息列表
+      public MobilePagerAdapter(FragmentManager fm, List<GoodsInfo> goodsList) {
+      	super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+      	mGoodsList = goodsList;
+      }
+      
+      // 获取碎片Fragment的个数
+      public int getCount() {
+      	return mGoodsList.size();
+      }
+      
+      // 获取指定位置的碎片Fragment
+      public Fragment getItem(int position) {
+      	return DynamicFragment.newInstance(position,
+      				mGoodsList.get(position).pic, mGoodsList.get(position).desc);
+      }
+      // 获得指定碎片页的标题文本
+      public CharSequence getPageTitle(int position) {
+      	return mGoodsList.get(position).name;
+      }
+  }
+  ```
+
+- 上面的适配器代码在getItem方法中不调用碎片的构造方法，却调用了newInstance方法，目的是给碎片对象传递参数信息。由newInstance方法内部先调用构造方法创建碎片对象，再调用setArguments方法塞进请求参数，然后在onCreateView中调用getArguments方法才能取出请求参数。
+
+## 8.5 Practice - 记账本
+
+# 9. 广播
+
+## 9.1 收发应用广播
+
+### 9.1.1 收发标准广播
+
+> - Android的广播机制正是借鉴了WiFi的通信原理，不必搭建专门的通路，就能在发送方与接收方之间建立连接。
+> - 同时广播（Broadcast）也是Android的四大组件之一，它用于Android各组件之间的灵活通信，与活动的区别在于：
+>   1. 活动只能一对一通信；而广播可以一对多，一人发送广播，多人接收处理。
+>   2. 对于发送方来说，广播不需要考虑接收方有没有在工作，接收方在工作就接收广播，不在工作就丢弃广播。
+>   3. 对于接收方来说，因为可能会收到各式各样的广播，所以接收方要自行过滤符合条件的广播，之后再解包处理。
+> - 与广播有关的方法主要有以下3个：
+>   1. sendBroadcast：发送广播。
+>   2. egisterReceiver：注册广播的接收器，可在onStart或onResume方法中注册接收器。
+>   3. unregisterReceiver：注销广播的接收器，可在onStop或onPause方法中注销接收器。
+- 广播的收发过程可分为3个步骤：发送标准广播、定义广播接收器、开关广播接收器
+
+#### 1. 发送标准广播
+
+- 步骤：1. 创建意图对象	2. 调用sendBroadcast方法发送广播
+
+  ```java
+  private final static String STANDARD_ACTION = "com.example.chapter09.standard";
+  
+  @Override
+  public void onClick(View v) {
+      if (v.getId() == R.id.btn_send_standard) {
+          Intent intent = new Intent(STANDARD_ACTION); // 创建指定动作的意图
+          sendBroadcast(intent); // 发送标准广播
+      }
+  }
+  ```
+
+#### 2. 定义广播接收器
+
+- Android提供了抽象之后的接收器基类BroadcastReceiver，开发者自定义的接收器都从BroadcastReceiver派生而来。新定义的接收器需要重写onReceive方法，方法内部先判断当前广播是否符合待接收的广播名称，校验通过再开展后续的业务逻辑
+
+  ```java
+  // 定义一个标准广播的接收器
+  private class StandardReceiver extends BroadcastReceiver {
+      // 一旦接收到标准广播，马上触发接收器的onReceive方法
+      @Override
+      public void onReceive(Context context, Intent intent) {
+          // 广播意图非空，且接头暗号正确
+          if (intent != null && intent.getAction().equals(STANDARD_ACTION)) {
+              mDesc = String.format("%s\n%s 收到一个标准广播", mDesc, DateUtil.getNowTime());
+              tv_standard.setText(mDesc);
+          }
+      }
+  }
+  ```
+
+#### 3. 开关广播接收器
+
+- 活动页面启动之后才注册接收器，活动页面停止之际就注销接收器。在注册接收器的时候，允许事先指定只接收某种类型的广播，即通过意图过滤器挑选动作名称一致的广播
+
+  ```java
+  private StandardReceiver standardReceiver; // 声明一个标准广播的接收器实例
+  
+  @Override
+  protected void onStart() {
+      super.onStart();
+      standardReceiver = new StandardReceiver(); // 创建一个标准广播的接收器
+      // 创建一个意图过滤器，只处理STANDARD_ACTION的广播
+      IntentFilter filter = new IntentFilter(STANDARD_ACTION);
+      registerReceiver(standardReceiver, filter); // 注册接收器，注册之后才能正常接收广播
+  }
+  
+  @Override
+  protected void onStop() {
+  	super.onStop();
+  	unregisterReceiver(standardReceiver); // 注销接收器，注销之后就不再接收广播
+  }
+  ```
+
+### 9.1.2 收发有序广播
+
+- 处理逻辑
+
+  - 一个广播存在多个接收器，这些接收器需要排队收听广播，这意味着该广播是条有序广播。
+  - 先收到广播的接收器A，既可以让其他接收器继续收听广播，也可以中断广播不让其他接收器收听
+
+- 步骤
+
+  1. 发送广播时要注明这是个有序广播
+
+     - 调用sendOrderedBroadcast方法才能发送有序广播
+
+       ```java
+       Intent intent = new Intent(ORDER_ACTION); // 创建一个指定动作的意图
+       sendOrderedBroadcast(intent, null); // 发送有序广播
+       ```
+
+  2. 定义有序广播的接收器
+
+     - 在接收器的内部代码调用abortBroadcast方法，就会中断有序广播，使得后面的接收器不能再接收该广播
+
+  3. 注册有序广播的多个接收器
+
+     - 接收器的注册操作调用registerReceiver方法，为了给接收器排队，还需调用意图过滤器的setPriority方法设置优先级，优先级越大的接收器，越先收到有序广播。如果不设置优先级，或者两个接收器的优先级相等，那么越早注册的接收器，会越先收到有序广播.
+
+       ```java
+       @Override
+       protected void onStart() {
+           super.onStart();
+           // 多个接收器处理有序广播的顺序规则为：
+           // 1、优先级越大的接收器，越早收到有序广播；
+           // 2、优先级相同的时候，越早注册的接收器越早收到有序广播
+           orderAReceiver = new OrderAReceiver();
+           IntentFilter filterA = new IntentFilter(ORDER_ACTION);
+           filterA.setPriority(8);
+           registerReceiver(orderAReceiver, filterA);
+       
+           orderBReceiver = new OrderBReceiver();
+           IntentFilter filterB = new IntentFilter(ORDER_ACTION);
+           filterB.setPriority(10);
+           registerReceiver(orderBReceiver, filterB);
+       }
+       ```
+
+### 9.1.3 收发静态广播
+
+- 在AndroidManifest.xml中注册接收器，该方式被称作静态注册(不推荐，不安全)。注册步骤如下：
+
+  1. 右击当前模块的默认包，依次选择右键菜单的New→Package，创建名为receiver的新包，用于存放静态注册的接收器代码。
+  2. 其次右击刚创建的receiver包，依次选择右键菜单的New→Other→Broadcast Receiver，Class Name填写接收器的类名
+
+- 手机振动的广播
+
+  - ```java
+    // activity.java
+    Vibrator vb = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+    vb.vibrate(500); // 命令震动器吱吱个若干秒，这里的500表示500毫秒
+    
+    // AndroidManifest.xml
+    <!-- 震动 -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    ```
+
+- 需要给静态广播指定包名，即调用意图对象的setComponent方法设置组件路径
+
+  ```java
+  String receiverPath = "com.example.chapter09.receiver.ShockReceiver";
+  Intent intent = new Intent(ShockReceiver.SHOCK_ACTION); // 创建一个指定动作的意图
+  // 发送静态广播之时，需要通过setComponent方法指定接收器的完整路径
+  ComponentName componentName = new ComponentName(this, receiverPath);
+  intent.setComponent(componentName); // 设置意图的组件信息
+  sendBroadcast(intent); // 发送静态广播
+  ```
+
+## 9.2 监听系统广播
+
+### 9.2.1 接收分钟到达广播
+
+- 要在运行时侦听分钟广播Intent.ACTION_TIME_TICK，即可在分钟切换之际收到广播信息
+
+- 系统发送，只需要侦听，即注册广播接受者
+
+  1. 步骤一，定义一个分钟广播的接收器，并重写接收器的onReceive方法，补充收到广播之后的处理逻辑。
+  2. 步骤二，重写活动页面的onStart方法，添加广播接收器的注册代码，注意要让接收器过滤分钟到达广播Intent.ACTION_TIME_TICK。
+  3. 步骤三，重写活动页面的onStop方法，添加广播接收器的注销代码。
+
+  ```java
+  @Override
+  protected void onStart() {
+      super.onStart();
+      timeReceiver = new TimeReceiver(); // 创建一个分钟变更的广播接收器
+      // 创建一个意图过滤器，只处理系统分钟变化的广播
+      IntentFilter filter = new IntentFilter(Intent.ACTION_TIME_TICK);
+      registerReceiver(timeReceiver, filter); // 注册接收器，注册之后才能正常接收广播
+  }
+  
+  @Override
+  protected void onStop() {
+      super.onStop();
+      unregisterReceiver(timeReceiver); // 注销接收器，注销之后就不再接收广播
+  }
+  
+  // 声明一个分钟广播的接收器实例
+  private TimeReceiver timeReceiver; 
+  // 定义一个分钟广播的接收器
+  private class TimeReceiver extends BroadcastReceiver {
+  	// 一旦接收到分钟变更的广播，马上触发接收器的onReceive方法
+      @Override
+      public void onReceive(Context context, Intent intent) {
+          if (intent != null) {
+              desc = String.format("%s\n%s 收到一个分钟到达广播%s", desc,
+              DateUtil.getNowTime(), intent.getAction());
+              tv_minute.setText(desc);
+      	}
+  	}
+  }
+  ```
+
+### 9.2.2 接收网络变更广播
+
+- 侦听网络变更广播，对于当前网络变成WiFi连接、变成数据连接的两种情况，需要分别判断并加以处理
+
+- 步骤：
+
+  1. 步骤一，定义一个网络广播的接收器，并重写接收器的onReceive方法，补充收到广播之后的处理逻辑。
+  2. 步骤二，重写活动页面的onStart方法，添加广播接收器的注册代码，注意要让接收器过滤网络变更广播android.net.conn.CONNECTIVITY_CHANGE。
+  3. 步骤三，重写活动页面的onStop方法，添加广播接收器的注销代码。
+
+- `onReceive` 表示收到了广播，还需要将广播消息解包
+
+  - 网络广播携带的包裹中networkInfo的对象，其数据类型为NetworkInfo，于是调用NetworkInfo对象的相关方法，即可获取详细的网络信息。下面是NetworkInfo的常用方法说明：
+
+    - getType：获取网络类型。
+
+      ![image-20230301212804688](https://s2.loli.net/2023/03/01/CBHWtDYaUnIpiNh.png)
+
+    - getTypeName：获取网络类型的名称。
+
+    - getSubtype：获取网络子类型。当网络类型为数据连接时，子类型为2G/3G/4G的细分类型，如CDMA、EVDO、HSDPA、LTE等。
+
+      ![image-20230301212838056](https://s2.loli.net/2023/03/01/z9WR8ZhwGj1M3sP.png)
+
+    - getSubtypeName：获取网络子类型的名称。
+
+    - getState：获取网络状态。
+
+      ![image-20230301212905008](https://s2.loli.net/2023/03/01/1n2Y8iHobxjfWTk.png)
+
+  - 
+
+  - ```java
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if (intent != null) {
+            NetworkInfo networkInfo = intent.getParcelableExtra("networkInfo");
+            // 收到一个网络变更广播，网络大类为MOBILE，网络小类为HSPA，网络制式为3G，网络状态为DISCONNECTED
+            // 收到一个网络变更广播，网络大类为WIFI，网络小类为，网络制式为未知，网络状态为CONNECTED
+            String text = String.format("收到一个网络变更广播，网络大类为%s，" +
+                            "网络小类为%s，网络制式为%s，网络状态为%s",
+                    networkInfo.getTypeName(),
+                    networkInfo.getSubtypeName(),
+                    NetworkUtil.getNetworkClass(networkInfo.getSubtype()),
+                    networkInfo.getState().toString());
+            Log.d("bay", text);
+        }
+    }
+    ```
+
+### 9.2.3 定时管理器AlarmManager
+
+- Android提供了专门的定时管理器AlarmManager，它利用系统闹钟定时发送广播，比分钟广播拥有更强大的功能。由于闹钟与震动器同属系统服务，且闹钟的服务名称为ALARM_SERVICE，因此依然调用getSystemService方法获取闹钟管理器的实例
+
+  ```xml
+  // 从系统服务中获取闹钟管理器
+  AlarmManager alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+  ```
+
+- AlarmManager的常见方法说明如下
+
+  - set：设置一次性定时器。第一个参数为定时器类型，通常填AlarmManager.RTC_WAKEUP；第二个参数为期望的执行时刻（单位为毫秒）；第三个参数为待执行的延迟意图（PendingIntent类型）。
+  - setAndAllowWhileIdle：设置一次性定时器，参数说明同set方法，不同之处在于：即使设备处于空闲状态，也会保证执行定时器。因为从Android 6.0开始，set方法在暗屏时不保证发送广播，必须调用setAndAllowWhileIdle方法才能保证发送广播。
+  - setRepeating：设置重复定时器。第一个参数为定时器类型；第二个参数为首次执行时间（单位为毫秒）；第三个参数为下次执行的间隔时间（单位为毫秒）；第四个参数为待执行的延迟意图（PendingIntent类型）。然而从Android 4.4开始，setRepeating方法不保证按时发送广播，只能通过setAndAllowWhileIdle方法间接实现重复定时功能。
+  - cancel：取消指定延迟意图的定时器。
+
+- 延迟意图`PendingIntent`
+
+  - 延迟意图不是马上执行的意图，而是延迟若干时间才执行的意图
+  - PendingIntent代表延迟的意图，它指向的组件不会马上激活；而Intent代表实时的意图，一旦被启动，它指向的组件就会马上激活。
+  - PendingIntent是一类消息的组合，不但包含目标的Intent对象，还包含请求代码、请求方式等信息。
+  - PendingIntent对象在创建之时便已知晓将要用于活动还是广播，例如调用getActivity方法得到的是活动跳转的延迟意图，调用getBroadcast方法得到的是广播发送的延迟意图。
+
+- 实现步骤：
+
+  1. 定义定时器的广播接收器
+
+     - 闹钟广播的接收器采用动态注册方式，它的实现途径与标准广播类似，都要从BroadcastReceiver派生新的接收器，并重写onReceive方法
+
+       ```java
+       // 声明一个闹钟广播事件的标识串
+       private String ALARM_ACTION = "com.example.chapter09.alarm";
+       private String mDesc = ""; // 闹钟时间到达的描述
+       
+       // 定义一个闹钟广播的接收器
+       public class AlarmReceiver extends BroadcastReceiver {
+           // 一旦接收到闹钟时间到达的广播，马上触发接收器的onReceive方法
+           @Override
+           public void onReceive(Context context, Intent intent) {
+               if (intent != null) {
+                   mDesc = String.format("%s\n%s 闹钟时间到达", mDesc,
+                   DateUtil.getNowTime());
+                   tv_alarm.setText(mDesc);
+                   
+                   // 从系统服务中获取震动管理器
+                   Vibrator vb = (Vibrator)
+                   context.getSystemService(Context.VIBRATOR_SERVICE);
+                   vb.vibrate(500); // 命令震动器吱吱个若干秒
+               }
+           }
+       }
+       ```
+
+  2. 开关定时器的广播接收器
+
+     - 定时接收器的开关流程参照标准广播，可以在活动页面的onStart方法中注册接收器，在活动页面的onStop方法中注销接收器
+
+       ```java
+       private AlarmReceiver alarmReceiver; // 声明一个闹钟的广播接收器
+       
+       @Override
+       public void onStart() {
+           super.onStart();
+           alarmReceiver = new AlarmReceiver(); // 创建一个闹钟的广播接收器
+           // 创建一个意图过滤器，只处理指定事件来源的广播
+           IntentFilter filter = new IntentFilter(ALARM_ACTION);
+           registerReceiver(alarmReceiver, filter); // 注册接收器，注册之后才能正常接收广播
+       }
+       
+       @Override
+       public void onStop() {
+           super.onStop();
+           unregisterReceiver(alarmReceiver); // 注销接收器，注销之后就不再接收广播
+       }
+       ```
+
+  3. 设置定时器的播报规则
+
+     - 先从系统服务中获取闹钟管理器，然后调用管理器的set***方法，把事先创建的延迟意图填到播报规则当中
+
+       ```java
+       // 发送闹钟广播
+       private void sendAlarm() {
+           Intent intent = new Intent(ALARM_ACTION); // 创建一个广播事件的意图
+           
+           // 创建一个用于广播的延迟意图
+           // 针对 S+ （版本 10000 及更高版本） 要求在创建 PendingIntent 时指定 FLAG_IMMUTABLE 或 FLAG_MUTABLE
+           // 强烈考虑使用 FLAG_IMMUTABLE，仅当某些功能依赖于 PendingIntent 是可变的时才使用 FLAG_MUTABLE
+           PendingIntent pIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+           
+           // 从系统服务中获取闹钟管理器
+           AlarmManager alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+           long delayTime = System.currentTimeMillis() + mDelay*1000; // 给当前时间加上若干秒
+           
+           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+               // 允许在空闲时发送广播，Android6.0之后新增的方法
+               alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, delayTime,
+               pIntent);
+           } else {
+           	// 设置一次性闹钟，延迟若干秒后，携带延迟意图发送闹钟广播（但Android6.0之后，set方法在暗屏时不保证发送广播，必须调用setAndAllowWhileIdle方法）
+           	alarmMgr.set(AlarmManager.RTC_WAKEUP, delayTime, pIntent);
+           }
+       }
+       ```
+
+  4. 闹钟重复播报的方法
+
+     ```java
+     public void onReceive(Context context, Intent intent) {
+         if (intent != null) {
+             if (ck_repeate.isChecked()) { // 需要重复闹钟广播
+             	sendAlarm(); // 发送闹钟广播
+             }
+         }
+     }
+     ```
+
+## 9.3 捕获屏幕的变更事件
+
+### 9.3.1 竖屏与横屏切换
+
+- 为了避免横竖屏切换时重新加载界面的情况，Android设计了一种配置变更机制，在指定的环境配置发生变更之时，无须重启活动页面，只需执行特定的变更行为。该机制的编码过程分为两步：
+
+  1. 修改AndroidManifest.xml
+
+     ```xml
+     <activity
+     android:name=".ChangeDirectionActivity"
+     android:configChanges="orientation|screenLayout|screenSize" />
+     ```
+
+     - `configChanges`: 在某些情况之下，配置项变更不用重启活动页面，只需调用onConfigurationChanged方法重新设定显示方式。故而只要给该属性指定若干豁免情况，就能避无谓的页面重启操作
+
+       ![image-20230301215539089](https://s2.loli.net/2023/03/01/pTnXdOAYtrbzyBh.png)
+
+  2. 修改活动页面的Java代码
+
+     - 重写活动的onConfigurationChanged方法，该方法的输入参数为Configuration类型的配置对象，根据配置对象的orientation属性，即可判断屏幕的当前方向是竖屏还是横屏，再补充对应的代码处理逻辑
+
+       ```java
+       // 在配置项变更时触发。比如屏幕方向发生变更等等
+       // 有的手机需要在系统的“设置→显示”菜单开启“自动旋转屏幕”，或者从顶部下拉，找到“自动旋转”图标并开启
+       @Override
+       public void onConfigurationChanged(Configuration newConfig) {
+           super.onConfigurationChanged(newConfig);
+           
+           switch (newConfig.orientation) { // 判断当前的屏幕方向
+               case Configuration.ORIENTATION_PORTRAIT: // 切换到竖屏
+                   mDesc = String.format("%s%s %s\n", mDesc,
+                   DateUtil.getNowTime(), "当前屏幕为竖屏方向");
+                   tv_monitor.setText(mDesc);
+                   break;
+                   
+               case Configuration.ORIENTATION_LANDSCAPE: // 切换到横屏
+                   mDesc = String.format("%s%s %s\n", mDesc,
+                   DateUtil.getNowTime(), "当前屏幕为横屏方向");
+                   tv_monitor.setText(mDesc);
+                   break;
+                   
+               default:
+               	break;
+           }
+       }
+       ```
+
+- 锁定屏幕方向XML设置
+
+  ```xml
+  <activity android:name=".ActTestActivity"
+  		android:screenOrientation="portrait"/>
+  ```
+
+### 9.3.2 回到桌面与切换任务列表
+
+- 回到桌面与打开任务列表由按键触发，例如按下主页键会回到桌面，按下任务键会打开任务列表。—> 这两个操作看起来属于按键事件，但系统并未提供相应的按键处理方法，而是通过广播发出事件信息。
+
+- 若想知晓是否回到桌面，以及是否打开任务列表，均需收听系统广播Intent.ACTION_CLOSE_SYSTEM_DIALOGS。至于如何区分当前广播究竟是回到桌面还是打开任务列表，则要从广播意图中获取原因reason字段，该字段值为homekey时表示回到桌面，值为recentapps时表示打开任务列表。
+
+- 画中画
+
+  ```java
+  public class ReturnDesktopActivity extends AppCompatActivity {
+  
+      private DesktopRecevier desktopRecevier;
+  
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+          desktopRecevier = new DesktopRecevier();
+          IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+          registerReceiver(desktopRecevier, filter);
+      }
+  
+      @Override
+      protected void onDestroy() {
+          super.onDestroy();
+          unregisterReceiver(desktopRecevier);
+      }
+  
+      // 在进入画中画模式或退出画中画模式时触发
+      @Override
+      public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, Configuration newConfig) {
+          super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+          if (isInPictureInPictureMode){
+              Log.d("bay","进入画中画模式");
+          }else{
+              Log.d("bay","退出画中画模式");
+          }
+      }
+  
+      // 定义一个返回到桌面的广播接收器
+      private class DesktopRecevier extends BroadcastReceiver{
+  
+          @Override
+          public void onReceive(Context context, Intent intent) {
+              if (intent != null && intent.getAction().equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)){
+                  String reason = intent.getStringExtra("reason");
+                  if (!TextUtils.isEmpty(reason) &&
+                          (reason.equals("homekey") || reason.equals("recentapps"))){
+                      // Android 8.0开始才提供画中画模式
+                      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                      && !isInPictureInPictureMode()){
+                          // 创建画中画模式的参数构建器
+                          PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder();
+                          // 设置宽高比例值，第一个参数表示分子，第二个参数表示分母
+                          // 下面的10/5=2，表示画中画窗口的宽度是高度的两倍
+                          // 设置画中画窗口的宽高比例
+                          Rational ratio = new Rational(10, 5);
+                          builder.setAspectRatio(ratio);
+                          // 进入画中画模式
+                          enterPictureInPictureMode(builder.build());
+                      }
+                  }
+              }
+          }
+      }
+  }
+  ```
+
+  - 时希望在进入画中画之际调整界面，则需重写活动的onPictureInPictureModeChanged方法，该方法在应用进入画中画模式或退出画中画模式时触发，在此可补充相应的处理逻辑
+
+  - 添加权限
+
+    ```xml
+    <activity
+        android:name=".ReturnDesktopActivity"
+        android:configChanges="orientation|screenLayout|screenSize"
+        android:supportsPictureInPicture="true"
+        android:theme="@style/AppCompatTheme" />
+    ```
