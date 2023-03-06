@@ -18,6 +18,277 @@
 
 `Alt+Insert`: 根据类内字段插入构造类、toString()等
 
+# RxPermissions
+
+0. RxPermissions（基于RxJava2）背景
+----------
+
+Android 6.0 （API level 23）中。将权限分成了两类。一类是**Install权限**（称之为**安装时权限**）。还有一类是**Runtime权限**（称之为**执行时权限**）。
+
+*   **Install权限**是什么？ 
+    **Install权限**：**安装时权限**，顾名思义，是在安装app时。就赋予该app的权限，即安装后马上获取到的权限。normal和signature级别的权限都是安装时权限。赋予app normal和signature权限时，**不会给用户提示界面，系统自己主动决定权限的赋予**。对于signature权限，假设使用权限的app与声明权限的app的签名不一致，则系统拒绝赋予该signature权限。
+    
+*   **Runtime权限**是什么？ 
+    **Runtime权限**：**执行时权限**。是指在app执行过程中。赋予app的权限。这个过程中，**会显示明显的权限授予界面，让用户决定是否授予权限**。假设app的`targetSdkVersion`是22（Lollipop MR1）及下面，dangerous权限是**安装时权限**，否则dangerous权限是**执行时权限**。
+    
+    
+    假设一个app的`targetSdkVersion`是23（或者23以上）。那么该app所申请的全部dangerous权限都是执行时权限。假设执行在Android 6.0的环境中，该app在执行时必须主动申请这些dangerous权限（调用`requestPermissions()`）。否则该app没有获取到dangerous权限。
+    
+
+很多其它关于权限的说明，请參考：[『Android 权限的一些细节』](http://blog.csdn.net/u013553529/article/details/53167072)
+
+**1\. RxPermissions的优点**
+------------------------
+
+`RxPermissions`是帮助开发人员简化`requestPermissions()`相关的处理。
+
+1.  开发人员不用操心Android执行环境的版本号。假设系统是Android 6.0之前的版本号，RxPermissions返回的结果是，app请求的每一个权限都被同意（granted）。
+
+
+   RxPermissions内部已经对Android版本号进行了推断：
+
+
+   ```java
+   boolean isMarshmallow() {
+       return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+   }
+   
+   public boolean isGranted(String permission) {
+       // 假设是Android 6.0 （Api 23）之前，则权限被同意使用。
+       return !isMarshmallow() || mRxPermissionsFragment.isGranted(permission);
+   }
+   ```
+
+2. 将权限申请的代码（`requestPermissions()`）和请求结果的代码（`onRequestPermissionsResult()`）放在一起管理，避免了代码的分散。
+
+3. RxPermissions具备Rx（RxJava）的特性，比如能够使用链式操作，能够执行filter操作，transform操作。等等。
+
+
+2. RxPermissions的版本号
+-------------------------
+
+> RxPermissions是基于RxJava的，RxJava如今有2个大版本号。一个RxJava 1.x（通常说RxJava），还有一个是RxJava2。
+>
+> 所以RxPermissions有2个版本号，分别支持RxJava和RxJava2。
+>
+> RxPermissions的源代码在[https://github.com/tbruyelle/RxPermissions](https://github.com/tbruyelle/RxPermissions)
+> 当中`master`分支是支持RxJava 1.x的版本号，包名为`com.tbruyelle.rxpermissions`。`2.x`分支是支持RxJava2的版本号。包名为`com.tbruyelle.rxpermissions2`。 
+> 默认看到的是master分支，所以看到的代码是支持RxJava 1.x的RxPermissions。
+>
+> 分支的选择（例如以下图）：  
+> 点击『Branch: master』之后，能够看到眼下有3个分支：`2.x`，`fix46`,和`master`。![RxPermissions源码](https://s2.loli.net/2023/03/02/Oo8Z4BxFPvwE176.png)
+>
+> 查看支持RxJava2的RxPermissions，将分支切换到2.x，例如以下：
+>
+> ![RxPermissions2.x](https://s2.loli.net/2023/03/02/jpCk3IqvDA61Hof.png)
+
+3. RxPermissions代码下载
+-------------------------
+
+下载包名为`com.tbruyelle.rxpermissions`的代码（支持RxJava1.x）：
+
+```shell
+$ git clone https://github.com/tbruyelle/RxPermissions
+```
+
+下载包名为`com.tbruyelle.rxpermissions2`的代码（支持RxJava2）：
+
+```shell
+$ git clone https://github.com/tbruyelle/RxPermissions RxPermissions2 -b 2.x
+```
+
+4. RxPermissions使用的注意事项
+----------------------------
+
+參考 [https://github.com/tbruyelle/RxPermissions](https://github.com/tbruyelle/RxPermissions) 中的README。
+
+1. minSdkVersion`必须 >= 11。`
+2. 使用RxPermissions申请权限，必须在`Activity.onCreate()`或者`View.onFinishInflate()`中处理。
+
+**不能在`onResume()`中处理。由于onResume()在App的生命周期中可能执行的非常频繁。假设在请求权限的时候。App又一次启动了（比如屏幕旋转导致的App关闭再又一次创建）。那么用户的选择（同意 或者 拒绝）将无法发给App。** 很多其它讨论，请參考：[https://github.com/tbruyelle/RxPermissions/issues/69](https://github.com/tbruyelle/RxPermissions/issues/69)
+
+5. RxPermissions使用
+-----------------------
+
+基于RxJava2，使用包名为`com.tbruyelle.rxpermissions2`的RxPermissions。
+
+### 5.1 App module的build.gradle
+
+```shell
+dependencies {
+    ...
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    compile 'io.reactivex.rxjava2:rxjava:2.0.5'
+    compile 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.3@aar'
+    ...
+}
+```
+
+### 5.2 AndroidManifest.xml中使用权限
+
+```xml
+    <!-- protection level is dangerous, need request runtime permission -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.READ_CALENDAR"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
+```
+
+### 5.3 在Activity的onCreate()中申请权限
+
+```java
+package com.galian.rxjavatest;
+
+import android.Manifest;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+
+import com.tbruyelle.rxpermissions2.Permission;
+import com.tbruyelle.rxpermissions2.RxPermissions;
+
+import io.reactivex.functions.Consumer;
+
+public class RxPermissionTestActivity extends AppCompatActivity {
+
+    private static final String TAG = "RxPermissionTest";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_rx_permission_test);
+
+        requestPermissions();
+    }
+
+    private void requestPermissions() {
+        RxPermissions rxPermission = new RxPermissions(RxPermissionTestActivity.this);
+        rxPermission
+                .requestEach(Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_CALENDAR,
+                        Manifest.permission.READ_CALL_LOG,
+                        Manifest.permission.READ_CONTACTS,
+                        Manifest.permission.READ_PHONE_STATE,
+                        Manifest.permission.READ_SMS,
+                        Manifest.permission.RECORD_AUDIO,
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.CALL_PHONE,
+                        Manifest.permission.SEND_SMS)
+                .subscribe(new Consumer<Permission>() {
+                    @Override
+                    public void accept(Permission permission) throws Exception {
+                        if (permission.granted) {
+                            // 用户已经同意该权限
+                            Log.d(TAG, permission.name + " is granted.");
+                        } else if (permission.shouldShowRequestPermissionRationale) {
+                            // 用户拒绝了该权限，没有选中『不再询问』（Never ask again）,那么下次再次启动时。还会提示请求权限的对话框
+                            Log.d(TAG, permission.name + " is denied. More info should be provided.");
+                        } else {
+                            // 用户拒绝了该权限，而且选中『不再询问』
+                            Log.d(TAG, permission.name + " is denied.");
+                        }
+                    }
+                });
+            }
+}
+```
+
+### 5.4 界面显示及log
+
+![界面显示及log](https://s2.loli.net/2023/03/02/mcrFzyKJBp7IaS5.png)
+
+假设点击『拒绝』。不选中『不再询问』，log为：
+
+```xml
+D/RxPermissionTest: android.permission.ACCESS_FINE_LOCATION is denied. More info should be provided.
+```
+
+假设点击『拒绝』，选中了『不再询问』。则log为：
+
+    D/RxPermissionTest: android.permission.ACCESS_FINE_LOCATION is denied.
+
+假设点击『同意』，log为：
+
+    D/RxPermissionTest: android.permission.ACCESS_FINE_LOCATION is granted.
+
+**6\. 參考**
+----------
+
+1.  [https://github.com/tbruyelle/RxPermissions](https://github.com/tbruyelle/RxPermissions)
+2.  [https://developer.android.com/guide/topics/permissions/requesting.html](https://developer.android.com/guide/topics/permissions/requesting.html)
+3.  [https://developer.android.com/training/permissions/requesting.html](https://developer.android.com/training/permissions/requesting.html)
+
+# Build窗口乱码问题
+
+![image-20230302210318133](https://s2.loli.net/2023/03/02/6SRPVlm1iOWY9IH.png)
+
+解决办法
+
+- 全局搜索：Edit Custom VM Options
+
+  ![image-20230302210429544](https://s2.loli.net/2023/03/02/TCJaxLgFNZs3ojq.png)
+
+- 添加 `-Dfile.encoding=UTF-8`
+
+  ![image-20230302210746556](C:/Users/bayyy/AppData/Roaming/Typora/typora-user-images/image-20230302210746556.png)
+
+# BLE蓝牙
+
+## 基本概念
+
+### 设备角色
+
+首先要明白的是，这两种角色的区分是硬件层面上，而且是成对出现的相对概念：
+ **中心设备（Central device**：功能相对强大，用来扫描和连接周边设备的，例如手机、平板等
+ **周边设备（Central device**：功能相对简单，功耗较小，被中心设备连接以提供数据的，例如手环、智能体温计等
+
+其实从最根本上来讲，它应该是在对建立连接的过程不同角色的一种区分。我们知道蓝牙设备要想让别人知道自己的存在，是要不间断的对外放松广播的，而另外一方则需要扫描并回复该广播包，这样才能建立连接，在这个过程中，负责广播的就是peripheral，而负责扫描的是Central。
+
+关于两者的连接过程需要注意：
+
+- 中心设备可以同时连接多个周边设备。
+- 周边设备一旦被连接上，立刻停止广播，断开后继续广播
+- 任何时候只能一个设备尝试连接，排队连接。
+
+### GATT
+
+BLE技术是基于GATT进行通信的，GATT是一种属性传输协议，简单的讲可以认为是一种属性传输的应用层协议。
+
+![img](https://s2.loli.net/2023/03/03/JRF9A4opw2hcxO3.webp)
+
+- 每个GATT由完成不同功能的Service组成；
+- 每个Service由不同的Characteristic组成；
+- 每个Characteristic由一个value和一个或者多个Descriptor组成；
+- Service、Characteristic相当于标签（Service相当于他的类别，Characteristic相当于它的名字），而value才真正的包含数据，Descriptor是对这个value进行的说明和描述，当然我们可以从不同角度来描述和说明，因此可以有多个Descriptor.
+
+>  实例：常见的小米手环是一个BLE设备，（假设）它包含三个Service,分别是提供设备信息的Service、提供步数的Service、检测心率的Service;
+>  而设备信息的service中包含的characteristic包括厂商信息、硬件信息、版本信息等；而心率Service则包括心率characteristic等，而心率characteristic中的value则真正的包含心率的数据，而descriptor则是对该value的描述说明，比如value的单位啊，描述啊，权限啊等。
+
+### GATT C/S
+
+**GATT server** vs. **GATT client**。这两种角色存在的阶段则是建立连接之后，根据对话地位的不同进行区分的，很容易理解的是，保有数据的那一方我们称之为GATT server，访问数据的那一方我们称之为GATT client。
+
+> 以手机和手表的例子来进行说明，手机和手机建立连接之前，我们都是用手机的蓝牙搜索功能去搜索手表的蓝牙设备，这个过程中很明显手表在进行BLE广播以便其他设备知道自己的存在，它在这个过程中就是peripheral的角色，而手机负责扫描的任务，自然扮演的就是Center了；两者建立了GATT连接后，当手机需要从手表中读取步数等传感器数据时，两者交互的数据是保存在手表中的，因此此时手表就是GATT server的角色，自然手机就作为GATT client；而当手表想要从手机读取短信电话等信息室，数据的保佑者又变成了手机，所以此时手机就是server ，而手表则是client。
+
+### Service/Characteristic
+
+- Characteristic是最小的数据逻辑单元。
+- value、descriptor中存储数据的解析由Server的工程师决定，并无规范，双发按照约定开发。
+- Service/Characteristic均有一个唯一的UUID标识，UUID既有16位的也有128位的，我们需要了解的是16位的UUID是经过蓝牙组织认证的，是需要购买的，当然也有一些通用的16位UUID。
+   例如Heart Rate服务的UUID就是0X180D,代码中表示为0X00001800-0000-1000-8000-00805f9b34fb,其他位为固定的。而128位的UUID则可以自定义。
+- GATT连接是独占的。
+
+
+
 # 1. 开发环境搭建
 
 ### 1.1 简介
@@ -2973,7 +3244,7 @@ public void onClick(View v) {
      >
      > 3. ```java
      >    package com.example.chapter07_server.provider;
-     >                                           
+     >                                                       
      >    import android.content.ContentProvider;
      >    import android.content.ContentValues;
      >    import android.content.UriMatcher;
@@ -2981,31 +3252,31 @@ public void onClick(View v) {
      >    import android.database.sqlite.SQLiteDatabase;
      >    import android.net.Uri;
      >    import android.util.Log;
-     >                                           
+     >                                                       
      >    import com.example.chapter07_server.UserInfoContent;
      >    import com.example.chapter07_server.database.UserDBHelper;
-     >                                           
+     >                                                       
      >    public class UserInfoProvider extends ContentProvider {
-     >                                           
+     >                                                       
      >        private UserDBHelper dbHelper;
      >        private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-     >                                           
+     >                                                       
      >        private static final int USERS = 1;
      >        private static final int USER = 2;
-     >                                           
+     >                                                       
      >        static {
      >            // 往Uri匹配器中添加指定的数据路径
      >            URI_MATCHER.addURI(UserInfoContent.AUTHORITIES, "user", USERS);
      >            URI_MATCHER.addURI(UserInfoContent.AUTHORITIES, "user/#", USER);
      >        }
-     >                                           
+     >                                                       
      >        @Override
      >        public boolean onCreate() {
      >            Log.d("bay", "UserInfoProvider onCreate");
      >            dbHelper = UserDBHelper.getInstance(getContext());
      >            return true;
      >        }
-     >                                           
+     >                                                       
      >        // content://com.example.chapter07_server.provider.UserInfoProvider/user
      >        @Override
      >        public Uri insert(Uri uri, ContentValues values) {
@@ -3017,7 +3288,7 @@ public void onClick(View v) {
      >            db.insert(UserDBHelper.TABLE_NAME, null, values);
      >            return uri;
      >        }
-     >                                           
+     >                                                       
      >        @Override
      >        public int delete(Uri uri, String selection, String[] selectionArgs) {
      >            int count = 0;
@@ -3028,7 +3299,7 @@ public void onClick(View v) {
      >                case USERS:
      >                    count = db.delete(UserDBHelper.TABLE_NAME, selection, selectionArgs);
      >                    break;
-     >                                           
+     >                                                       
      >                // content://com.example.chapter07_server.provider.UserInfoProvider/user/1
      >                // 删除单行
      >                case USER:
@@ -3039,21 +3310,21 @@ public void onClick(View v) {
      >            db.close();
      >            return count;
      >        }
-     >                                           
+     >                                                       
      >        @Override
      >        public int update(Uri uri, ContentValues values, String selection,
      >                          String[] selectionArgs) {
-     >                                           
+     >                                                       
      >            throw new UnsupportedOperationException("Not yet implemented");
      >        }
-     >                                           
+     >                                                       
      >        @Override
      >        public String getType(Uri uri) {
      >            // TODO: Implement this to handle requests for the MIME type of the data
      >            // at the given URI.
      >            throw new UnsupportedOperationException("Not yet implemented");
      >        }
-     >                                           
+     >                                                       
      >        @Override
      >        public Cursor query(Uri uri, String[] projection, String selection,
      >                            String[] selectionArgs, String sortOrder) {
