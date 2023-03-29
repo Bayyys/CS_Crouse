@@ -8,11 +8,15 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
+import com.example.chapter09.AlarmActivity;
+
 public class AlarmReceiver extends BroadcastReceiver {
 
     public static final String ALARM_ACTION = "com.example.chapter09.alarm";
 
     private final Context mContext;
+
+    private Integer count = new Integer(0);
 
     public AlarmReceiver(Context context) {
         super();

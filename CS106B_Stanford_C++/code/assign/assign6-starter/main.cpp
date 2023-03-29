@@ -6,6 +6,7 @@
 #include "simpio.h"
 #include "strlib.h"
 #include "testing/SimpleTest.h"
+#include <qfile.h>
 using namespace std;
 
 
@@ -17,16 +18,26 @@ void huffmanConsoleProgram();
  * We will supply our own main() during grading.
  */
 int main() {
-    if (runSimpleTests(SELECTED_TESTS)) {
-        return 0;
-    }
+//    if (runSimpleTests(SELECTED_TESTS)) {
+//        return 0;
+//    }
+     QByteArray test;
+     char c = static_cast<char>(0xaa);
+     char b = static_cast<char>(0x06);
+     char a = static_cast<char>(0x00);
+     char d = 0xaa;
+
+     test.append(static_cast<char>(0x0a));
+     test.append(static_cast<char>(0x06));
+     test.append(static_cast<char>(0x00));
+//    cout << "test" << test << endl;
 
     /*
      * In order to run the console program to compress/decompress whole files
      * change the above flag to NO_TESTS, which will cause the console program
      * to be invoked via the fuction call below.
      */
-    huffmanConsoleProgram();
+//    huffmanConsoleProgram();
 
     cout << "All done, exiting" << endl;
     return 0;
